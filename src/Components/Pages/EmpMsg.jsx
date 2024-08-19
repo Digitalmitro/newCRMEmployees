@@ -36,13 +36,15 @@ const EmpMsg = () => {
   useEffect(() => {
     if (formData.user_id) {
       socket = io(ENDPOINT);
-      socket.emit("setup", { userId: formData.user_id });
+      socket.emit("register", formData.user_id);
       socket.on("connected", () => setSocketConnected(true));
       socket.on("typing", () => setIsTyping(true));
       socket.on("stop typing", () => setIsTyping(false));
 
-      socket.on("chat message", (newMessage) => {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      socket.on("chat message", (msg) => {
+        // Code to display the message in the chat window
+        console.log("Message received:", msg);
+        setMessages((prevMessages) => [...prevMessages, msg]); // Assuming you have a state for messages
       });
 
       return () => {
@@ -58,6 +60,7 @@ const EmpMsg = () => {
         name: formData.name,
         email: formData.email,
         senderId: userId,
+        receiverId: "66c2e95d90490ca5dfc00764", // Make this dynamic if needed.
         message: input,
         role: "user",
         time: moment().format("h:mm:ss a"),
