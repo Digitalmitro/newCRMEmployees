@@ -258,7 +258,7 @@ const Sidebar = () => {
             Notes
           </Button>
         </li>
-        {/* <li>
+        <li>
           <Button style={{ color: "#555151" }}
             className={`custom-button ${context.activeButton === 7 ? 'active' : ''}`}
             onClick={() => handleClick(7, '/employee-msg', 'Messages')}
@@ -270,7 +270,7 @@ const Sidebar = () => {
             </span>
             Send Messages
           </Button>
-        </li> */}
+        </li>
         {/* Add other buttons similarly */}
       </ul>
     </div>
