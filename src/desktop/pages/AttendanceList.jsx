@@ -1,9 +1,22 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/authContext";
+import moment from "moment";
 function AttendanceList() {
-  const data = [
-    { Date: "2025-02-07", ClockIn: "08:00 AM", ClockOut: "05:00 PM", ProductionStatus: "Completed", WorkStatus: "Active" },
-    { Date: "2025-02-06", ClockIn: "09:00 AM", ClockOut: "06:00 PM", ProductionStatus: "Pending", WorkStatus: "Active" },
-    { Date: "2025-02-05", ClockIn: "07:30 AM", ClockOut: "04:30 PM", ProductionStatus: "Completed", WorkStatus: "Inactive" },
-  ];
+  const [attendance,setAttendance]=useState([])
+  const {fetchAttendance}=useAuth()
+
+  const getAddentanceData=async()=>{
+    const data=await fetchAttendance("today");
+    if(data){
+      console.log("data",data?.data?.[0])
+      setAttendance(data?.data)
+    }
+  }
+
+  useEffect(()=>{
+    getAddentanceData()
+  },[])
+ 
   return (
     <div className=" p-4">
       <div className="border-b border-gray-300 p-2">
@@ -32,13 +45,13 @@ function AttendanceList() {
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
-            <tr key={index} className="text-[10px] text-gray-500">
-              <td className="border border-gray-300 px-4 py-2 text-center">{item.Date}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{item.ClockIn}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{item.ClockOut}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{item.ProductionStatus}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{item.WorkStatus}</td>
+          {attendance.map((item, index) => (
+            <tr key={index} className="text-[13px] text-gray-500">
+              <td className="border border-gray-300 px-4 py-2 text-center">{item.createdAt}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{item.currentDate}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{item.punchOut}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{item.status}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{item.workStatus}</td>
             </tr>
           ))}
         </tbody>
