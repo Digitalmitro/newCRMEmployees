@@ -6,33 +6,28 @@ import { useAuth } from "../../context/authContext";
 import moment from "moment";
 function Attendance() {
   const { token, fetchAttendance } = useAuth();
-
   const [isClockedOut, setIsClockedOut] = useState(true);
   const navigate = useNavigate();
   const opeAttendancelist = () => {
     navigate("/attendance-list");
   };
   const handleBookLeave = () => {
-    navigate("/book-leave");
-  };
-
+    navigate("/book-leave");  };
   const [attendanceData, setAttendanceData] = useState([]);
-  const duration = moment.duration(attendanceData.workingTime, "minutes");
-
+  const duration = moment.duration(attendanceData?.workingTime, "minutes");
+  const clockinTime = attendanceData?.currentDate ? moment(attendanceData?.currentDate).format("HH:mm"): "00:00";
+  const clockoutTime =attendanceData?.punchOut ? moment(attendanceData?.punchOut).format("HH:mm"):"00:00";
   const getAttendance = async () => {
     const data = await fetchAttendance("today");
     if (data) {
       setAttendanceData(data?.data?.[0]);
-
-      setIsClockedOut(!data?.data?.[0]?.isPunchedIn);
+      setIsClockedOut(!data?.data?.[0]?.isPunchedIn)
     }
   };
   useEffect(() => {
     getAttendance();
   }, []);
-
-  const [clientIp, setClientIp] = useState("");
-
+  const [clientIp, setClientIp] = useState(""); 
   useEffect(() => {
     const fetchIpAddress = async () => {
       try {
@@ -56,7 +51,6 @@ function Attendance() {
       console.error("No token available!");
       return;
     }
-
     const apiUrl = isClockedOut
       ? `${import.meta.env.VITE_BACKEND_API}/attendance/punch-in`
       : `${import.meta.env.VITE_BACKEND_API}/attendance/punch-out`;
@@ -77,8 +71,7 @@ function Attendance() {
         const data = await response.json();
         console.log(data.message);
       }
-      getAttendance()
-      // setIsClockedOut(false);
+     getAttendance()
     } catch (error) {
       console.error("Error in punch-in API:", error);
     }
@@ -121,39 +114,34 @@ function Attendance() {
         </div>
       </div>
 
-      {/* Work Details */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 shadow-md rounded-lg text-sm">
-        <div>
-          <p className="text-gray-500 text-sm">Clock In:</p>
-          <p className="font-semibold ">
-            {moment(attendanceData.currentDate).format("HH:mm")}
-          </p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Clock Out:</p>
-          <p className="font-semibold">
-            {moment(attendanceData.punchOut).format("HH:mm")}
-          </p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Working Time:</p>
-          <p className="font-semibold">{`${duration.hours()}h ${duration.minutes()}m`}</p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">IP Address:</p>
-          <p className="font-semibold">{attendanceData.ip}</p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Status:</p>
-          <p className="font-semibold text-green-500">
-            {attendanceData?.status}
-          </p>
-        </div>
-        <div>
-          <p className="text-gray-500 text-sm">Work Status:</p>
-          <p className="font-semibold">{attendanceData.workStatus}</p>
-        </div>
+    {/* Work Details */}
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 shadow-md rounded-lg text-sm">
+      <div>
+        <p className="text-gray-500 text-sm">Clock In:</p>
+        <p className="font-semibold ">{clockinTime}</p>
       </div>
+      <div>
+        <p className="text-gray-500 text-sm">Clock Out:</p>
+        <p className="font-semibold">{clockoutTime}</p>
+      </div>
+      <div>
+        <p className="text-gray-500 text-sm">Working Time:</p>
+        <p className="font-semibold">{`${duration.hours()}h ${duration.minutes()}m`}</p>
+      </div>
+      <div>
+        <p className="text-gray-500 text-sm">IP Address:</p>
+        <p className="font-semibold">{attendanceData?.ip
+}</p>
+      </div>
+      <div>
+        <p className="text-gray-500 text-sm">Status:</p>
+        <p className="font-semibold text-green-500">{attendanceData?.status}</p>
+      </div>
+      <div>
+        <p className="text-gray-500 text-sm">Work Status:</p>
+        <p className="font-semibold">{attendanceData?.workStatus}</p>
+      </div>
+    </div>
 
       {/* Action Buttons */}
       <div className="flex flex-wrap justify-center gap-4 mt-6">
