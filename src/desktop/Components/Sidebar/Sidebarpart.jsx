@@ -1,0 +1,126 @@
+import { Link, useNavigate } from "react-router-dom";
+import home from "../../../assets/desktop/home.svg";
+import attendence from "../../../assets/desktop/attendence.svg";
+import bidirection from "../../../assets/desktop/bidirection.svg";
+import book from "../../../assets/desktop/book.svg";
+import calls from "../../../assets/desktop/calls.svg";
+import notes from "../../../assets/desktop/notes.svg";
+import sales from "../../../assets/desktop/sales.svg";
+import profile from "../../../assets/desktop/profileIcon.svg";
+import arrow from "../../../assets/desktop/arrow.svg";
+import edit from "../../../assets/desktop/edit.svg";
+function Sidebarpart() {
+  const navigate=useNavigate()
+  const handleChat=()=>{
+    navigate("/chat")
+  }
+  const handleChannel=()=>{
+    navigate("/create-channel")
+  }
+  return (
+    <div className="  flex ">
+      <div className="px-3 pt-2 border border-orange-400">
+        {/* Navigation Links */}
+        <nav className="flex flex-col gap-1  items-center">
+          <Link to="/" className="flex items-center gap-2 p-2 ">
+            <div className="flex flex-col items-center">
+              <img src={home} alt="" className="h-[40px] w-[40px]" />
+              <p className="text-[12px] font-semibold">Home</p>
+            </div>
+          </Link>
+          <Link to="/attendance" className="flex items-center gap-2 p-2 ">
+            <div className="flex flex-col items-center">
+              <img src={attendence} alt="" className="h-[30px] w-[30px]" />
+              <p className="text-[12px] font-semibold">Attendance</p>
+            </div>
+          </Link>
+          <Link to="/projects" className="flex items-center gap-2 p-2 ">
+            <div className="flex flex-col items-center">
+              <img src={book} alt="" className="h-[35px] w-[35px]" />
+              <p className="text-[12px] font-semibold">Projects</p>
+            </div>
+          </Link>
+          <Link to="/callback" className="flex items-center gap-2 p-2 ">
+            <div className="flex flex-col items-center">
+              <img src={calls} alt="" className="h-[35px] w-[35px]" />
+              <p className="text-[12px] font-semibold">Callback</p>
+            </div>
+          </Link>
+          <Link to="/transfer" className="flex items-center gap-2 p-2">
+            <div className="flex flex-col items-center">
+              <img src={bidirection} alt="" className="h-[30px] w-[30px]" />
+              <p className="text-[12px] font-semibold">Transfer</p>
+            </div>
+          </Link>
+          <Link to="/sales" className="flex items-center gap-2 p-2">
+            <div className="flex flex-col items-center">
+              <img src={sales} alt="" className="h-[40px] w-[40px]" />
+              <p className="text-[12px] font-semibold">Sales</p>
+            </div>
+          </Link>
+          <Link to="/notes" className="flex items-center gap-2 p-2 ">
+            <div className="flex flex-col items-center">
+              <img src={notes} alt="" className="h-[35px] w-[35px]" />
+              <p className="text-[12px] font-semibold">Notes</p>
+            </div>
+          </Link>
+          <div className="flex flex-col items-center">
+            <img src={profile} alt="" className="h-[35px] w-[35px]" />
+          </div>
+        </nav>
+      </div>
+
+      <div className="bg-gray-200 w-[300px] p-4 border border-orange-400">
+        <div className="flex justify-between pt-4 mb-4">
+          <h2 className="text-[15px] font-medium   flex gap-2">
+            Twinkle <img src={arrow} alt="" className="w-[8px] pt-1" />
+          </h2>
+          <img src={edit} alt="" className="w-[10px] h-[10px]" />
+        </div>
+
+        {/* Channels Section */}
+        <div className="mb-4 pt-8">
+          <h3 className="text-[12px] font-semibold text-gray-600 flex gap-2">
+            Channels <img src={arrow} alt="" className="w-[8px] pt-1" />
+          </h3>
+          <ul className="mt-2">
+            <li>
+              <Link to="#" className="block p-2 text-gray-700 text-[12px]">
+                Project 1
+              </Link>
+            </li>
+            <li>
+              <Link to="#" className="block p-2 text-gray-700 text-[12px]">
+                Project 2
+              </Link>
+            </li>
+            <li>
+              <p className="block p-2 text-gray-700 text-[10px] cursor-pointer" onClick={handleChannel}>
+                + Add Channels
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        {/* Messages Section */}
+        <div className="mb-4">
+          <h3 className="text-[12px] font-semibold text-gray-600 flex gap-2">
+            Messages <img src={arrow} alt="" className="w-[8px] pt-1" />
+          </h3>
+          <ul className="mt-2">
+            <li className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={handleChat}>
+              Twinkle shaw
+            </li>
+            <li>
+              <p className="block p-2 text-gray-700 text-[10px]">
+                + Add Coworkers
+              </p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Sidebarpart;
