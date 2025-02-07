@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   
     const fetchAttendance = async (range) => {
         try {
-            const response = await fetch(`http://localhost:5000/attendance/user?range=${range}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/attendance/user?range=${range}`, {
                 method: "GET",
                 headers: {
                     "Authorization": token,
