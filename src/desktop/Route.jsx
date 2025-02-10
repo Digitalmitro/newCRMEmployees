@@ -9,6 +9,8 @@ import CreateChannel from "./pages/CreateChannel";
 import AddChannelPeople from "./pages/AddChannelPeople";
 import AttendanceList from "./pages/AttendanceList";
 import BookLeave from "./pages/BookLeave";
+import NotificationPage from "./pages/Notification";
+
 function DesktopRouting() {
   return (
     <div className="flex">
@@ -24,6 +26,7 @@ function DesktopRouting() {
           <Route path="/addpeople-channel" element={<AddChannelPeople />} />
           <Route path="/attendance-list" element={<AttendanceList />} />
           <Route path="/book-leave" element={<BookLeave />} />
+          <Route path="/notification" element={<NotificationPage/>} />
         </Routes>
       </div>
     </div>

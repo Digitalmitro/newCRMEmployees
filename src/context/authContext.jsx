@@ -1,12 +1,26 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState,useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const initialToken =
-        localStorage.getItem("token") || "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2E1ZDZkNDBhZDk0YjY3Y2VhNjAzYmYiLCJpYXQiOjE3Mzg5MjM3NjgsImV4cCI6MTc0MTUxNTc2OH0.uWv8xC8bmH2yYTh6tbmhY2dMKBj67aKT7JThySEzbzo"
+    const initialToken =localStorage.getItem("token") || "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2N2E1ZDZkNDBhZDk0YjY3Y2VhNjAzYmYiLCJpYXQiOjE3Mzg5MjM3NjgsImV4cCI6MTc0MTUxNTc2OH0.uWv8xC8bmH2yYTh6tbmhY2dMKBj67aKT7JThySEzbzo"
+    const [userData, setUserData] = useState(null);
     const [token, setToken] = useState(initialToken);
-  
+
+    useEffect(() => {
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                setUserData(decoded);
+            } catch (error) {
+                console.error("Invalid token:", error);
+                setUserData(null);
+            }
+        } else {
+            setUserData(null);
+        }
+    }, [token]);
     const fetchAttendance = async (range) => {
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/attendance/user?range=${range}`, {
@@ -31,7 +45,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ token, setToken, fetchAttendance }}>
+        <AuthContext.Provider value={{ token, setToken,userData, fetchAttendance }}>
             {children}
         </AuthContext.Provider>
     );
