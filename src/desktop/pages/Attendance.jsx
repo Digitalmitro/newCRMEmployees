@@ -1,19 +1,18 @@
-import profile from "../../assets/desktop/profileIcon.svg"
-import edit from "../../assets/desktop/edit.svg"
+import profile from "../../assets/desktop/profileIcon.svg";
+import edit from "../../assets/desktop/edit.svg";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {useAuth,} from "../../context/authContext"
+import { useAuth } from "../../context/authContext";
 import moment from "moment";
 function Attendance() {
   const { token, fetchAttendance } = useAuth();
   const [isClockedOut, setIsClockedOut] = useState(true);
-  const navigate=useNavigate()
-  const opeAttendancelist=()=>{
-    navigate("/attendance-list")
-  }
-  const handleBookLeave=()=>{
-    navigate("/book-leave")
-  }
+  const navigate = useNavigate();
+  const opeAttendancelist = () => {
+    navigate("/attendance-list");
+  };
+  const handleBookLeave = () => {
+    navigate("/book-leave");  };
   const [attendanceData, setAttendanceData] = useState([]);
   const duration = moment.duration(attendanceData?.workingTime, "minutes");
   const clockinTime = attendanceData?.currentDate ? moment(attendanceData?.currentDate).format("HH:mm"): "00:00";
@@ -45,7 +44,6 @@ function Attendance() {
     };
 
     fetchIpAddress();
-
   }, []);
 
   const handlePunch = async () => {
@@ -54,25 +52,24 @@ function Attendance() {
       return;
     }
     const apiUrl = isClockedOut
-      ? "http://localhost:5000/attendance/punch-in"
-      : "http://localhost:5000/attendance/punch-out";
+      ? `${import.meta.env.VITE_BACKEND_API}/attendance/punch-in`
+      : `${import.meta.env.VITE_BACKEND_API}/attendance/punch-out`;
 
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
-          "Authorization": token,
+          Authorization: token,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          clientIp,  
-        
+          clientIp,
         }),
       });
 
-      if(response){
-        const data=await response.json()
-        console.log(data.message)
+      if (response) {
+        const data = await response.json();
+        console.log(data.message);
       }
      getAttendance()
     } catch (error) {
@@ -82,30 +79,30 @@ function Attendance() {
 
   return (
     <div className="w-full p-6  bg-gray-50">
-    {/* Header */}
-    <div className="flex items-center gap-4 mb-6">
-      <img
-        src={profile}
-        alt="Profile"
-        className=" rounded-full border border-gray-300 object w-10 h-10 object-cover"
-      />
-      <div>
-        <h2 className="text-md font-semibold">your.username (you)</h2>
-        <p className="text-sm text-green-500">● Active</p>
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <img
+          src={profile}
+          alt="Profile"
+          className=" rounded-full border border-gray-300 object w-10 h-10 object-cover"
+        />
+        <div>
+          <h2 className="text-md font-semibold">your.username (you)</h2>
+          <p className="text-sm text-green-500">● Active</p>
+        </div>
+        <button className=" px-4 text-gray-500 hover:text-gray-700">
+          <img src={edit} alt="" />
+        </button>
       </div>
-      <button className=" px-4 text-gray-500 hover:text-gray-700">
-        <img src={edit} alt="" />
-      </button>
-    </div>
 
-    {/* Punch In/Out Section */}
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-      <h3 className="text-md font-semibold mb-2">Clock In / Clock Out</h3>
-      <p className="text-sm text-gray-500 mb-4">
-        Click the button below to clock in.
-      </p>
-     <div className="space-x-5">
-     <button
+      {/* Punch In/Out Section */}
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h3 className="text-md font-semibold mb-2">Clock In / Clock Out</h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Click the button below to clock in.
+        </p>
+        <div className="space-x-5">
+          <button
             className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
             onClick={handlePunch}
           >
@@ -114,8 +111,8 @@ function Attendance() {
           <button className="text-sm p-1.5 text-gray-600 text-[12px] bg-gray-100 rounded-md inline-block">
             IP: {clientIp || "Fetching..."}
           </button>
-     </div>
-    </div>
+        </div>
+      </div>
 
     {/* Work Details */}
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 shadow-md rounded-lg text-sm">
@@ -146,23 +143,29 @@ function Attendance() {
       </div>
     </div>
 
-    {/* Action Buttons */}
-    <div className="flex flex-wrap justify-center gap-4 mt-6">
-      <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleBookLeave}>
-        + Book Leave
-      </button>
-      <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-        Forgot to Clock
-      </button>
-      <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={opeAttendancelist}>
-        View Calendar
-      </button>
-      <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-        Employee Concern
-      </button>
+      {/* Action Buttons */}
+      <div className="flex flex-wrap justify-center gap-4 mt-6">
+        <button
+          className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
+          onClick={handleBookLeave}
+        >
+          + Book Leave
+        </button>
+        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
+          Forgot to Clock
+        </button>
+        <button
+          className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
+          onClick={opeAttendancelist}
+        >
+          View Calendar
+        </button>
+        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
+          Employee Concern
+        </button>
+      </div>
     </div>
-  </div>
-  )
+  );
 }
 
 export default Attendance;
