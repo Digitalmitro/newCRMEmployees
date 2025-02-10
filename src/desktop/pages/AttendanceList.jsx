@@ -12,9 +12,9 @@ function AttendanceList() {
       setAttendance(data?.data);
     }
   };
-  const dateFormat=moment(attendance.createdAt).format("YYYY-MM-DD")
-  const clockinTime = moment(attendance.createdAt).format("HH:mm");
-  const clockoutTime =moment(attendance.createdAt).format("HH:mm");
+  const dateFormat=moment(attendance.currentDate).format("YYYY-MM-DD")
+  const clockinTime = moment(attendance.currentDate).format("HH:mm");
+  const clockoutTime =moment(attendance.punchOut).format("HH:mm");
 
   useEffect(() => {
     getAddentanceData();
