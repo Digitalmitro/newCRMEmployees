@@ -16,13 +16,12 @@ function Attendance() {
   }
   const handleConcern=()=>{
     navigate("/BookLeave");
-
   }
   const handleBookLeave = () => {
     navigate("/book-leave");  };
   const [attendanceData, setAttendanceData] = useState([]);
   const duration = moment.duration(attendanceData?.workingTime, "minutes");
-  const clockinTime = attendanceData?.currentDate ? moment(attendanceData?.currentDate).format("HH:mm"): "00:00";
+  const clockinTime = attendanceData?.firstPunchIn ? moment(attendanceData?.firstPunchIn).format("HH:mm"): "00:00";
   const clockoutTime =attendanceData?.punchOut ? moment(attendanceData?.punchOut).format("HH:mm"):"00:00";
   const getAttendance = async () => {
     const data = await fetchAttendance("today");
@@ -52,7 +51,7 @@ function Attendance() {
 
     fetchIpAddress();
   }, []);
-
+ 
   const handlePunch = async () => {
     if (!token) {
       console.error("No token available!");

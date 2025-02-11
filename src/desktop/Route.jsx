@@ -17,6 +17,7 @@ import TransferList from "./pages/TransferList";
 import SalesList from "./pages/SalesList";
 import Concern from "./pages/Concern";
 import Login from "./pages/Login";
+import NotesPage from "./pages/Notes";
 import { useAuth } from "../context/authContext";
 
 function DesktopRouting() {
@@ -49,6 +50,7 @@ function DesktopRouting() {
                   <Route path="/transferlist" element={<TransferList />} />
                   <Route path="/saleslist" element={<SalesList />} />
                   <Route path="/concern" element={<Concern />} />
+                  <Route path="/notes" element={<NotesPage/>} />
                   <Route path="/login" element={<Navigate to="/" />} />
                 </Routes>
               </div>

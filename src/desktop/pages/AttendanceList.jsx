@@ -12,9 +12,6 @@ function AttendanceList() {
       setAttendance(data?.data);
     }
   };
-  const dateFormat=moment(attendance.currentDate).format("YYYY-MM-DD")
-  const clockinTime = moment(attendance.currentDate).format("HH:mm");
-  const clockoutTime =moment(attendance.punchOut).format("HH:mm");
 
   useEffect(() => {
     getAddentanceData();
@@ -75,19 +72,19 @@ function AttendanceList() {
             {attendance.map((item, index) => (
               <tr key={index} className="text-[13px] text-gray-500">
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {dateFormat}
+                  {moment(item?.currentDate).format("YYYY-MM-DD")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {clockinTime}
+                  {moment(item?.firstPunchIn).format("HH:mm")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {clockoutTime}
+                  {moment(item?.punchOut).format("HH:mm")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {item.status}
+                  {item?.status}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {item.workStatus}
+                  {item?.workStatus}
                 </td>
               </tr>
             ))}
