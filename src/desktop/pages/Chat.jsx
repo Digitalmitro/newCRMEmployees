@@ -41,10 +41,10 @@ function Chat() {
                 msg.sender === "user" ? "bg-gradient-to-r from-orange-400 to-yellow-700 text-white ml-auto" : "bg-gradient-to-l from-gray-700 to-gray-500 text-white"
               }`}
               style={{
-                width: `${Math.min(msg.text.length * 10, 300)}px`, // Adjust 10px and max width 300px as needed
+                width: `${Math.min(msg.text.length * 20, 300)}px`, 
               }}
             >
-              {msg.text}
+              {msg.text} 
             </div>
           ))}
         </div>

@@ -9,6 +9,16 @@ function Home() {
   const handleAttendaneList=()=>{
     navigate("/attendance-list")
   }
+  const handleCallback=()=>{
+    navigate("/callbacklist")
+  }
+  const handleSales=()=>{
+    navigate("/callbacklist")
+  }
+  const handleTransfer=()=>{
+    navigate("/transferlist")
+
+  }
   return (
     <div className=" w-full border border-orange-400 min-h-screen">
       
@@ -20,19 +30,19 @@ function Home() {
             Attendee List: February 87
           </p>
         </div>
-        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer">
+        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer" onClick={handleCallback}>
           <img src={calls} alt="" className="w-[50px] h-[50px]" />
           <p className="flex flex-col p-2 text-[12px]">All Callback: 1</p>
         </div>
-        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer">
+        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer" onClick={handleSales}>
           <img src={sales} alt="" className="w-[50px] h-[50px]" />
           <p className="flex flex-col p-2 text-[12px]">All Sales: 0</p>
         </div>
-        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer">
+        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer" onClick={handleTransfer}>
           <img src={transfer} alt="" className="w-[50px] h-[50px]" />
           <p className="flex flex-col p-2 text-[12px]"> All Transfer: 0</p>
         </div>
-        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer">
+        <div className="p-4 border rounded-md text-center h-[150px] w-full flex flex-col justify-center items-center cursor-pointer" >
           <img src={project} alt="" className="w-[50px] h-[50px]" />
           <p className="flex flex-col p-2 text-[12px]"> Projects: 0</p>
         </div>

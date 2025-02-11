@@ -9,6 +9,7 @@ import sales from "../../../assets/desktop/sales.svg";
 import profile from "../../../assets/desktop/profileIcon.svg";
 import arrow from "../../../assets/desktop/arrow.svg";
 import edit from "../../../assets/desktop/edit.svg";
+import logo from "../../../assets/desktop/logo.svg";
 function Sidebarpart() {
   const navigate=useNavigate()
   const handleChat=()=>{
@@ -22,6 +23,11 @@ function Sidebarpart() {
       <div className="px-3 pt-2 border border-orange-400">
         {/* Navigation Links */}
         <nav className="flex flex-col gap-1  items-center">
+        <Link to="/" className="flex items-center">
+            <div className="flex flex-col items-center">
+              <img src={logo} alt="" className="h-[70px] w-[70px]" />
+            </div>
+          </Link>
           <Link to="/" className="flex items-center gap-2 p-2 ">
             <div className="flex flex-col items-center">
               <img src={home} alt="" className="h-[40px] w-[40px]" />
@@ -40,21 +46,21 @@ function Sidebarpart() {
               <p className="text-[12px] font-semibold">Projects</p>
             </div>
           </Link>
-          <Link to="/callback" className="flex items-center gap-2 p-2 ">
+          <Link to="/callbacklist" className="flex items-center gap-2 p-2 ">
             <div className="flex flex-col items-center">
-              <img src={calls} alt="" className="h-[35px] w-[35px]" />
+              <img src={calls} alt="" className="h-[30px] w-[30px]" />
               <p className="text-[12px] font-semibold">Callback</p>
             </div>
           </Link>
-          <Link to="/transfer" className="flex items-center gap-2 p-2">
+          <Link to="/transferlist" className="flex items-center gap-2 p-2">
             <div className="flex flex-col items-center">
               <img src={bidirection} alt="" className="h-[30px] w-[30px]" />
               <p className="text-[12px] font-semibold">Transfer</p>
             </div>
           </Link>
-          <Link to="/sales" className="flex items-center gap-2 p-2">
+          <Link to="/saleslist" className="flex items-center gap-2 p-2">
             <div className="flex flex-col items-center">
-              <img src={sales} alt="" className="h-[40px] w-[40px]" />
+              <img src={sales} alt="" className="h-[30px] w-[30px]" />
               <p className="text-[12px] font-semibold">Sales</p>
             </div>
           </Link>

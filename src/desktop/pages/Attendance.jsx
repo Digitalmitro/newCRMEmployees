@@ -11,6 +11,12 @@ function Attendance() {
   const opeAttendancelist = () => {
     navigate("/attendance-list");
   };
+  const handleForgot=()=>{
+    navigate("/BookLeave");
+  }
+  const handleConcern=()=>{
+    navigate("/BookLeave");
+  }
   const handleBookLeave = () => {
     navigate("/book-leave");  };
   const [attendanceData, setAttendanceData] = useState([]);
@@ -45,7 +51,7 @@ function Attendance() {
 
     fetchIpAddress();
   }, []);
-
+ 
   const handlePunch = async () => {
     if (!token) {
       console.error("No token available!");
@@ -151,8 +157,8 @@ function Attendance() {
         >
           + Book Leave
         </button>
-        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-          Forgot to Clock
+        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleForgot}>
+        Forgot to Clock
         </button>
         <button
           className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
@@ -160,7 +166,7 @@ function Attendance() {
         >
           View Calendar
         </button>
-        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
+        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleConcern}>
           Employee Concern
         </button>
       </div>
