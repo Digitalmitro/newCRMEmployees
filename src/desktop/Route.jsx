@@ -19,6 +19,7 @@ import Concern from "./pages/Concern";
 import Login from "./pages/Login";
 import NotesPage from "./pages/Notes";
 import ProtectedRoute from "./ProtectedRoute";
+import NotificationPage from "./pages/Notification";
 
 function DesktopRouting() {
   return (
@@ -52,6 +53,7 @@ function DesktopRouting() {
                     <Route path="/saleslist" element={<SalesList />} />
                     <Route path="/concern" element={<Concern />} />
                     <Route path="/notes" element={<NotesPage />} />
+                    <Route path="/notification" element={<NotificationPage/>}/>
                   </Routes>
                 </div>
               </div>

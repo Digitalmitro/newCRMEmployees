@@ -4,18 +4,24 @@ import moment from "moment";
 function AttendanceList() {
   const [attendance, setAttendance] = useState([]);
   const { fetchAttendance } = useAuth();
+  const lateCount=attendance.filter(item=>item.status==="Late").length;
+  const absentCount=attendance.filter(item=>item.workStatus==="Absent").length;
+  const halfCount=attendance.filter(item=>item.workStatus==="Half Day").length;
+  const [range,setRange]=useState("this_month")
 
   const getAddentanceData = async () => {
-    const data = await fetchAttendance("today");
+    const data = await fetchAttendance(range);
     if (data) {
-      console.log("data", data?.data?.[0]);
       setAttendance(data?.data);
     }
   };
 
   useEffect(() => {
     getAddentanceData();
-  }, []);
+    
+  }, [range]);
+
+  
 
   return (
     <div className=" p-4">
@@ -23,28 +29,28 @@ function AttendanceList() {
         <h2 className="text-[15px] font-medium pb-2">View Calendar</h2>
       </div>
       <div className="pt-6 flex gap-4 justify-start">
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Month
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("year")}>
+        Whole Year
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Year
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("today")}>
+        Last Month 
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Date
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("last_month")}>
+        This Month
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Date
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("this_month")}>
+         Today
         </button>
       </div>
       <div className="pt-6 flex gap-4 justify-end">
         <button className="border border-gray-500 px-5 rounded-sm text-[12px] font-medium ">
-          Late:0
+          Late:{lateCount}
         </button>
         <button className="border border-gray-500 px-5 rounded-sm text-[12px] font-medium ">
-          Absent:0
+          Absent:{absentCount}
         </button>
         <button className="border border-gray-500 px-5 rounded-sm text-[12px] font-medium ">
-          Half Day:0
+          Half Day:{halfCount}
         </button>
       </div>
       <div className="overflow-x-auto p-4 mt-4">
@@ -58,10 +64,13 @@ function AttendanceList() {
                 ClockIn
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
-                ClockOut
+              ClockOut
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
-                Production Status
+              Status
+              </th>
+              <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
+                Production
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
                 Work Status
@@ -82,6 +91,9 @@ function AttendanceList() {
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item?.status}
+                </td>
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                {moment.utc(item?.workingTime * 60 * 1000).format("H [hr] m [mins]")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item?.workStatus}
