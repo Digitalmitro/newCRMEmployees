@@ -16,7 +16,7 @@ function SalesList() {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("sales data", data?.data);
+          
           setSales(data?.data || []);
           setTotalPages(data.totalPages || 1);
         }

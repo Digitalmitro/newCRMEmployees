@@ -26,7 +26,7 @@ function Callback() {
 
   const handleSubmit=async(e)=>{
     e.preventDefault();
-    console.log(callback)
+   
     try {
       const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/callback`,{
         method:"POST",

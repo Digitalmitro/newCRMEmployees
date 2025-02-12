@@ -13,10 +13,10 @@ function Attendance() {
     navigate("/attendance-list");
   };
   const handleForgot=()=>{
-    navigate("/BookLeave");
+    navigate("/forgotClock");
   }
   const handleConcern=()=>{
-    navigate("/BookLeave");
+    navigate("/concern");
   }
   const handleBookLeave = () => {
     navigate("/book-leave");  };
@@ -77,7 +77,7 @@ function Attendance() {
 
       if (response) {
         const data = await response.json();
-        console.log(data.message);
+        
       }
      getAttendance()
     } catch (error) {
