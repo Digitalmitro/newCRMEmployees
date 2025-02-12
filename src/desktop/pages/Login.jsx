@@ -35,6 +35,7 @@ function Login() {
       // Store token
       localStorage.setItem("token", data.token);
       setToken(data.token);
+      console.log(data.token)
 
       // Redirect to home or the intended page
       navigate("/");
