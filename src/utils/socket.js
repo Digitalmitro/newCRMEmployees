@@ -1,9 +1,9 @@
 // src/utils/socket.js
 import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
+import logo from "../assets/desktop/logo.svg"
 
-const SERVER_URL = "http://localhost:5000"; // Change if using a different backend URL
-const socket = io(SERVER_URL, { autoConnect: false, reconnection: true });
+const socket = io(`${import.meta.env.VITE_BACKEND_API}`, { autoConnect: false, reconnection: true });
 
 const requestNotificationPermission = async () => {
   if ("Notification" in window) {
@@ -18,7 +18,7 @@ const showNotification = (title, body) => {
   if ("Notification" in window && Notification.permission === "granted") {
     new Notification(title, {
       body,
-      icon: "/logo192.png", // Change to your app's icon
+      icon: {logo}, // Change to your app's icon
     });
   }
 };

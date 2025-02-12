@@ -1,14 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import search from "../../../assets/desktop/search.svg";
 import notificationIcon from "../../../assets/desktop/bell.png"; // Notification icon
-
+import { IoIosClose } from "react-icons/io";
+import logo from "../../../assets/desktop/logo.svg"
 function Searchbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
-
+  const [notification, setNotification] = useState([]);
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
   };
+  const token = localStorage.getItem("token");
+
+  const removeNotification=(index)=>{
+    setNotification(notification.filter((_, i) => i !== index));
+  }
+
+  useEffect(() => {
+    const notification = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_API}/notification/get-notifications`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("notification", data?.notifications);
+          setNotification(data?.notifications);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    notification();
+  }, []);
 
   return (
     <div className="w-full border-b-2 border-orange-400 pt-6 px-6 flex justify-between relative">
@@ -41,12 +70,33 @@ function Searchbar() {
         <div className="flex justify-between items-center pb-4 border-b">
           <h2 className="text-lg font-semibold">Notifications</h2>
           <button className="text-gray-600" onClick={toggleSidebar}>
-            ✖
+          <IoIosClose size={32}/>
           </button>
         </div>
-        <div className="mt-4">
-          <p className="text-sm text-gray-500">No new notifications</p>
-        </div>
+        <div className="mt-4 space-y-3">
+      {notification.length > 0 ? (
+        notification.map((notify, i) => (
+          <div key={i} className="p-3 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 transition flex justify-between items-center">
+            <img src={logo} alt="" className="w-[40px]"/>
+            <div >
+            
+              <h3 className="text-sm font-semibold text-gray-700">{notify.title}</h3>
+              <p className="text-xs text-gray-500 mt-1">{notify.description}</p>
+            </div>
+
+            <button
+              className="text-red-500 text-xs font-bold px-2 py-1 hover:text-red-700"
+              onClick={() => removeNotification(i)}
+            >
+              <IoIosClose size={26}/>
+            </button>
+
+          </div>
+        ))
+      ) : (
+        <p className="text-sm text-gray-500 text-center">No new notifications</p>
+      )}
+    </div>
       </div>
 
       {/* Overlay to close sidebar */}

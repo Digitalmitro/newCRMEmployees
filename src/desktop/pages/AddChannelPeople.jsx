@@ -13,9 +13,7 @@ const dummyPeople = [
   "Sayani"
 ];
 
-const handlePeople=()=>{
-  const navigate=useNavigate()
-}
+
 
 function AddChannelPeople() {
   const [searchTerm, setSearchTerm] = useState("");
