@@ -5,7 +5,7 @@
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const limit = 10;
+    const limit = 5;
     const navigate = useNavigate();
   
     useEffect(() => {
