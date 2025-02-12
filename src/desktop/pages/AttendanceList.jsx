@@ -1,32 +1,27 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 function AttendanceList() {
   const [attendance, setAttendance] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
   const { fetchAttendance } = useAuth();
-  const lateCount = attendance.filter((item) => item.status === "Late").length;
-  const absentCount = attendance.filter(
-    (item) => item.workStatus === "Absent"
-  ).length;
-  const halfCount = attendance.filter(
-    (item) => item.workStatus === "Half Day"
-  ).length;
-  console.log("show this", lateCount);
+  const lateCount=attendance.filter(item=>item.status==="Late").length;
+  const absentCount=attendance.filter(item=>item.workStatus==="Absent").length;
+  const halfCount=attendance.filter(item=>item.workStatus==="Half Day").length;
+  const [range,setRange]=useState("this_month")
 
   const getAddentanceData = async () => {
-    const data = await fetchAttendance("this_month");
+    const data = await fetchAttendance(range);
     if (data) {
-      console.log("data", data?.data?.[0]);
       setAttendance(data?.data);
     }
   };
 
   useEffect(() => {
     getAddentanceData();
-  }, []);
+    
+  }, [range]);
+
+  
 
   return (
     <div className=" p-4">
@@ -34,24 +29,17 @@ function AttendanceList() {
         <h2 className="text-[15px] font-medium pb-2">View Calendar</h2>
       </div>
       <div className="pt-6 flex gap-4 justify-start">
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            dateFormat="yyyy-MM"
-            showMonthYearPicker
-            placeholderText="Select a Month"
-            className="border px-4  outline-none border-none text-[12px] "
-          />
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("year")}>
+        Whole Year
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Year
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("today")}>
+        Last Month 
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Date
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("last_month")}>
+        This Month
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Date
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("this_month")}>
+         Today
         </button>
       </div>
       <div className="pt-6 flex gap-4 justify-end">
@@ -76,10 +64,10 @@ function AttendanceList() {
                 ClockIn
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
-                ClockOut
+              ClockOut
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
-                Status
+              Status
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
                 Production
@@ -105,9 +93,7 @@ function AttendanceList() {
                   {item?.status}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {moment
-                    .utc(item?.workingTime * 60 * 1000)
-                    .format("H [hr] m [mins]")}
+                {moment.utc(item?.workingTime * 60 * 1000).format("H [hr] m [mins]")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item?.workStatus}
