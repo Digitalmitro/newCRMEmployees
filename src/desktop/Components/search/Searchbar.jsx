@@ -29,7 +29,6 @@ function Searchbar() {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("notification", data?.notifications);
           setNotification(data?.notifications);
         }
       } catch (error) {

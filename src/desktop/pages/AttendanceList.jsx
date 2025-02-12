@@ -32,13 +32,13 @@ function AttendanceList() {
         <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("year")}>
         Whole Year
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("today")}>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("last_month")}>
         Last Month 
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("last_month")}>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("this_month")}>
         This Month
         </button>
-        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("this_month")}>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1 cursor-pointer" onClick={()=>setRange("today")}>
          Today
         </button>
       </div>
