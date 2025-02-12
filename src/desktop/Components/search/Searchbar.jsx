@@ -7,7 +7,6 @@ function Searchbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
 
   const toggleSidebar = () => {
-    console.log("Notification icon clicked!");
     setIsSidebarOpen((prev) => !prev);
   };
 
