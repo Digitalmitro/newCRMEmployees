@@ -2,6 +2,7 @@
 import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 
+
 const SERVER_URL = "http://localhost:5000"; // Change if using a different backend URL
 const socket = io(SERVER_URL, { autoConnect: false, reconnection: true });
 
@@ -88,15 +89,15 @@ export const onMessageReceived = (callback) => {
 };
 
 
-// export const onNotificationReceived = (callback) => {
+export const onNotificationReceived = (callback) => {
   socket.on("receive-notification", (notification) => {
-    // callback(notification);
+    callback(notification);
     // console.log(notification);
 
     // ✅ Show browser notification for alerts
     showNotification(notification.title, notification.description);
   });
-// };
+};
 
 // Disconnect socket
 export const disconnectSocket = () => {
