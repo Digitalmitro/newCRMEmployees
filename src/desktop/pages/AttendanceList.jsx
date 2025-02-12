@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 function AttendanceList() {
   const [attendance, setAttendance] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
   const { fetchAttendance } = useAuth();
+  const lateCount = attendance.filter((item) => item.status === "Late").length;
+  const absentCount = attendance.filter(
+    (item) => item.workStatus === "Absent"
+  ).length;
+  const halfCount = attendance.filter(
+    (item) => item.workStatus === "Half Day"
+  ).length;
+  console.log("show this", lateCount);
 
   const getAddentanceData = async () => {
-    const data = await fetchAttendance("today");
+    const data = await fetchAttendance("this_month");
     if (data) {
       console.log("data", data?.data?.[0]);
       setAttendance(data?.data);
@@ -24,7 +35,14 @@ function AttendanceList() {
       </div>
       <div className="pt-6 flex gap-4 justify-start">
         <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-          Select Month
+          <DatePicker
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)}
+            dateFormat="yyyy-MM"
+            showMonthYearPicker
+            placeholderText="Select a Month"
+            className="border px-4  outline-none border-none text-[12px] "
+          />
         </button>
         <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
           Select Year
@@ -38,13 +56,13 @@ function AttendanceList() {
       </div>
       <div className="pt-6 flex gap-4 justify-end">
         <button className="border border-gray-500 px-5 rounded-sm text-[12px] font-medium ">
-          Late:0
+          Late:{lateCount}
         </button>
         <button className="border border-gray-500 px-5 rounded-sm text-[12px] font-medium ">
-          Absent:0
+          Absent:{absentCount}
         </button>
         <button className="border border-gray-500 px-5 rounded-sm text-[12px] font-medium ">
-          Half Day:0
+          Half Day:{halfCount}
         </button>
       </div>
       <div className="overflow-x-auto p-4 mt-4">
@@ -61,7 +79,10 @@ function AttendanceList() {
                 ClockOut
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
-                Production Status
+                Status
+              </th>
+              <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
+                Production
               </th>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
                 Work Status
@@ -82,6 +103,11 @@ function AttendanceList() {
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item?.status}
+                </td>
+                <td className="border border-gray-300 px-4 py-2 text-center">
+                  {moment
+                    .utc(item?.workingTime * 60 * 1000)
+                    .format("H [hr] m [mins]")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item?.workStatus}
