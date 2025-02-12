@@ -61,7 +61,7 @@ function Attendance() {
     const apiUrl = isClockedOut
       ? `${import.meta.env.VITE_BACKEND_API}/attendance/punch-in`
       : `${import.meta.env.VITE_BACKEND_API}/attendance/punch-out`;
-      console.log( token)
+      // console.log( token)
 
     try {
       const response = await fetch(apiUrl, {
