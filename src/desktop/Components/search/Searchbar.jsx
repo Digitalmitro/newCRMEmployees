@@ -3,14 +3,32 @@ import search from "../../../assets/desktop/search.svg";
 import notificationIcon from "../../../assets/desktop/bell.png"; // Notification icon
 import { IoIosClose } from "react-icons/io";
 import logo from "../../../assets/desktop/logo.svg"
+import { onNotificationReceived } from "../../../utils/socket";
+import { MdLogout } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 function Searchbar() {
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notification, setNotification] = useState([]);
+  const token = localStorage.getItem("token");
+  const navigate=useNavigate();
+  useEffect(() => {
+    onNotificationReceived((notification) => {
+      setNotification((prev) => [notification, ...prev]); // Add new notification
+      setUnreadCount((prev) => prev + 1); // Increase unread count
+    });
+  }, []);
+ 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
+    setUnreadCount(0)
   };
-  const token = localStorage.getItem("token");
+
+  const handleLogout=()=>{
+    localStorage.removeItem("token");
+    navigate("/login")
+  }
+
 
   const removeNotification=(index)=>{
     setNotification(notification.filter((_, i) => i !== index));
@@ -42,15 +60,16 @@ function Searchbar() {
     <div className="w-full border-b-2 border-orange-400 pt-6 px-6 flex justify-between relative">
       {/* Search Bar */}
       <div className="mb-6 bg-[#E3E3E3] w-[700px] rounded flex gap-2 px-4">
-        <img src={search} alt="" />
+        <img src={search} alt="Search Icon" />
         <input
           type="text"
           placeholder="Search"
-          className="p-1 text-[13px] w-full border-none outline-none"
+          className="p-1 text-[13px] w-full border-none outline-none bg-transparent"
         />
       </div>
 
       {/* Notification Icon */}
+      <div className="flex gap-4">
       <div className="relative cursor-pointer" onClick={toggleSidebar}>
         <img src={notificationIcon} alt="Notifications" className="w-6 h-6" />
         {unreadCount > 0 && (
@@ -59,10 +78,15 @@ function Searchbar() {
           </span>
         )}
       </div>
+      {/* logout */}
+      <div className="cursor-pointer" onClick={handleLogout}>
+      <MdLogout size={25}/>
+      </div>
+      </div>
 
       {/* Notification Sidebar */}
       <div
-        className={`fixed top-0 right-0 w-80 h-full bg-white shadow-lg transition-transform ${
+        className={`fixed top-0 right-0 w-80 h-full bg-white shadow-lg transition-transform transform ${
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         } p-4 z-50`}
       >
@@ -97,6 +121,8 @@ function Searchbar() {
       )}
     </div>
       </div>
+
+      
 
       {/* Overlay to close sidebar */}
       {isSidebarOpen && (

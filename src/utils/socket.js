@@ -88,15 +88,15 @@ export const onMessageReceived = (callback) => {
 };
 
 
-// export const onNotificationReceived = (callback) => {
+export const onNotificationReceived = (callback) => {
   socket.on("receive-notification", (notification) => {
-    // callback(notification);
+    callback(notification);
     // console.log(notification);
 
     // ✅ Show browser notification for alerts
     showNotification(notification.title, notification.description);
   });
-// };
+};
 
 // Disconnect socket
 export const disconnectSocket = () => {
