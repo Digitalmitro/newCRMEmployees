@@ -20,7 +20,7 @@ function Home() {
 
   }
   return (
-    <div className=" w-full border border-orange-400 min-h-screen">
+    <div className=" w-full  ">
       
       {/* Card Grid */}
       <div className="grid grid-cols-3 gap-8 w-full p-6">

@@ -6,6 +6,7 @@ import { useAuth } from "../../context/authContext";
 import moment from "moment";
 function Attendance() {
   const { token, fetchAttendance } = useAuth();
+
   const [isClockedOut, setIsClockedOut] = useState(true);
   const navigate = useNavigate();
   const opeAttendancelist = () => {
@@ -60,12 +61,13 @@ function Attendance() {
     const apiUrl = isClockedOut
       ? `${import.meta.env.VITE_BACKEND_API}/attendance/punch-in`
       : `${import.meta.env.VITE_BACKEND_API}/attendance/punch-out`;
+      console.log( token)
 
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({

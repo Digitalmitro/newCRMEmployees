@@ -14,7 +14,7 @@
   
     const fetchData = async (page) => {
       try {
-        const response = await fetch(`http://localhost:5001/transfer/all?page=${page}&limit=${limit}`);
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/transfer/all?page=${page}&limit=${limit}`);
         const result = await response.json();
         setData(result.data || []);
         setTotalPages(result.totalPages || 1);
@@ -23,48 +23,6 @@
       }
     };
   
-   const dummyData = [
-    {
-      createdDate: "2024-02-10",
-      name: "John Doe",
-      phone: "+1 234 567 8901",
-      email: "johndoe@example.com",
-      view: "View",
-      status: "Active",
-    },
-    {
-      createdDate: "2024-02-09",
-      name: "Jane Smith",
-      phone: "+44 789 123 4567",
-      email: "janesmith@example.com",
-      view: "View",
-      status: "Inactive",
-    },
-    {
-      createdDate: "2024-02-08",
-      name: "Robert Johnson",
-      phone: "+91 98765 43210",
-      email: "robertj@example.com",
-      view: "View",
-      status: "Pending",
-    },
-    {
-      createdDate: "2024-02-07",
-      name: "Emily Davis",
-      phone: "+61 456 789 012",
-      email: "emilyd@example.com",
-      view: "View",
-      status: "Active",
-    },
-    {
-      createdDate: "2024-02-06",
-      name: "Michael Brown",
-      phone: "+33 612 345 678",
-      email: "michaelb@example.com",
-      view: "View",
-      status: "Inactive",
-    },
-  ];
     const handleNavigate=()=>{
         navigate("/transfer")
       }
@@ -100,15 +58,15 @@
               <th className="border px-3 py-2">Phone</th>
               {/* <th className="border px-3 py-2">Call Date</th> */}
               <th className="border px-3 py-2">Domain Name</th>
-              <th className="border px-3 py-2">Address</th>
+              {/* <th className="border px-3 py-2">Address</th> */}
               {/* <th className="border px-3 py-2">Comments</th>
               <th className="border px-3 py-2">Budget</th>
-              <th className="border px-3 py-2">Sent To</th>
-              <th className="border px-3 py-2">Action</th> */}
+              <th className="border px-3 py-2">Sent To</th>*/}
+              <th className="border px-3 py-2">Action</th> 
             </tr>
           </thead>
           <tbody>
-            {(data.length > 0 ? data : dummyData).map((item, index) => (
+            {data.map((item, index) => (
               <tr key={index} className="text-[13px] text-gray-500 text-center">
                 <td className="border px-3 py-2">{item.createdDate}</td>
                 {/* <td className="border px-3 py-2">{item.createdBy}</td> */}
@@ -135,17 +93,17 @@
       {/* Pagination */}
       <div className="flex justify-center mt-4">
         <button
-          className="px-3 py-1 mx-1 border rounded bg-gray-200"
+          className=" mx-1 border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
           disabled={currentPage === 1}
           onClick={() => setCurrentPage(currentPage - 1)}
         >
           Previous
         </button>
-        <span className="px-4 py-1 border bg-gray-100 rounded">
+        <span className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          className="px-3 py-1 mx-1 border rounded bg-gray-200"
+          className=" mx-1 border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
           disabled={currentPage === totalPages}
           onClick={() => setCurrentPage(currentPage + 1)}
         >

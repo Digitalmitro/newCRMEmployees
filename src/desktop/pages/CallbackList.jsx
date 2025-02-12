@@ -14,7 +14,7 @@ function CallbackList() {
 
   const fetchData = async (page) => {
     try {
-      const response = await fetch(`http://localhost:5001/callback/all?page=${page}&limit=${limit}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/all?page=${page}&limit=${limit}`);
       const result = await response.json();
       setData(result.data || []);
       setTotalPages(result.totalPages || 1);
@@ -23,34 +23,7 @@ function CallbackList() {
     }
   };
 
-  const dummyData = [
-    {
-      createdDate: "2024-02-10",
-      createdBy: "Admin",
-      name: "John Doe",
-      email: "johndoe@example.com",
-      phone: "+1 234 567 8901",
-      callDate: "2024-02-11",
-      domainName: "example.com",
-      address: "123 Street, NY",
-      comments: "Interested in automation",
-      budget: "$5,000",
-      sentTo: "Sales Team",
-    },
-    {
-      createdDate: "2024-02-09",
-      createdBy: "Manager",
-      name: "Jane Smith",
-      email: "janesmith@example.com",
-      phone: "+44 789 123 4567",
-      callDate: "2024-02-10",
-      domainName: "smart-home.com",
-      address: "456 Avenue, UK",
-      comments: "Looking for a demo",
-      budget: "$3,000",
-      sentTo: "Support Team",
-    },
-  ];
+
 
   const handleNavigate = () => {
     navigate("/callback");
@@ -101,7 +74,7 @@ function CallbackList() {
             </tr>
           </thead>
           <tbody>
-            {(data.length > 0 ? data : dummyData).map((item, index) => (
+            {data.map((item, index) => (
               <tr key={index} className="text-[13px] text-gray-500 text-center">
                 <td className="border px-3 py-2">{item.createdDate}</td>
                 {/* <td className="border px-3 py-2">{item.createdBy}</td> */}
@@ -128,17 +101,17 @@ function CallbackList() {
       {/* Pagination */}
       <div className="flex justify-center mt-4">
         <button
-          className="px-3 py-1 mx-1 border rounded bg-gray-200"
+          className=" mx-1 border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
           disabled={currentPage === 1}
           onClick={() => setCurrentPage(currentPage - 1)}
         >
           Previous
         </button>
-        <span className="px-4 py-1 border bg-gray-100 rounded">
+        <span className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
           Page {currentPage} of {totalPages}
         </span>
         <button
-          className="px-3 py-1 mx-1 border rounded bg-gray-200"
+          className=" mx-1 border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
           disabled={currentPage === totalPages}
           onClick={() => setCurrentPage(currentPage + 1)}
         >
