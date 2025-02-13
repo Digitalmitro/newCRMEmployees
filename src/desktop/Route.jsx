@@ -21,6 +21,7 @@ import NotesPage from "./pages/Notes";
 import ProtectedRoute from "./ProtectedRoute";
 import NotificationPage from "./pages/Notification";
 import ForgotClock from "./pages/ForgotClock";
+import AddCoworkers from "./pages/AddCoworkers";
 
 function DesktopRouting() {
   return (
@@ -57,6 +58,7 @@ function DesktopRouting() {
                     <Route path="/notification" element={<NotificationPage/>}/>
                     <Route path="/concern" element={<Concern/>}/>
                     <Route path="/forgotClock" element={<ForgotClock/>}/>
+                    <Route path="/addCoworker" element={<AddCoworkers/>}/>
 
                   </Routes>
                 </div>

@@ -25,7 +25,9 @@ function Sidebarpart() {
     allUsers();
   }, []);
 
-  console.log("all users", employees);
+  const handleCowrokers=()=>{
+    navigate("/addCoworker")
+  }
 
   const navigate = useNavigate();
   const handleChat = (name,id) => {
@@ -148,7 +150,7 @@ function Sidebarpart() {
                 {user.name}
               </li>
             ))}
-            <li className="block p-2 text-gray-700 text-[12px] cursor-pointer">
+            <li className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={handleCowrokers}>
               + Add Coworker
             </li>
           </ul>
