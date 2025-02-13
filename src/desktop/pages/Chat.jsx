@@ -5,7 +5,7 @@ import { Send } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { sendMessage, onMessageReceived, connectSocket } from "../../utils/socket";
 import { useAuth } from "../../context/authContext";
-
+import moment from "moment";
 const Chat = () => {
   const location=useLocation()
   const user = location.state;
@@ -22,6 +22,7 @@ const Chat = () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/message/messages/${senderId}/${receiverId}`);
         setMessages(res.data?.messages);
+        console.log(res.data?.messages)
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
@@ -68,6 +69,9 @@ const Chat = () => {
     }
   };
 
+
+  
+
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
       {/* Chat Header */}
@@ -88,12 +92,19 @@ const Chat = () => {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`p-2 max-w-xs rounded-lg mb-2
+            className={`p-2 max-w-xs rounded-lg mb-2 flex justify-between 
               ${msg.sender === senderId ? "bg-orange-500 text-white ml-auto" : "bg-gray-700 text-white"}
             `}
-            style={{ width: `${Math.min(msg.message.length * 20, 300)}px` }}
+            style={{ 
+              width: `${
+                msg.message && msg.message.length <= 5
+                  ? 90 
+                  : Math.min((msg.message?.length ?? 0) * 15, 300)
+              }px` 
+            }}
+            
           >
-            {msg.message}
+            <span>{msg.message}</span> <span className="text-[9px] flex flex-col justify-end">{moment(messages.createdAt).format("HH:mm")}</span>
           </div>
         ))}
         <div ref={messagesEndRef} /> {/* Auto-scroll anchor */}
