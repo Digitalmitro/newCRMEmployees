@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
 function Attendance() {
-  const { token, fetchAttendance } = useAuth();
-
+  const { token, fetchAttendance,userData } = useAuth();
   const [isClockedOut, setIsClockedOut] = useState(true);
+  console.log(userData?.name?.charAt(0))
   const navigate = useNavigate();
   const opeAttendancelist = () => {
     navigate("/attendance-list");
@@ -86,16 +86,14 @@ function Attendance() {
   };
 
   return (
-    <div className="w-full p-6  bg-gray-50">
+    <div className="w-full p-6 bg-gray-50">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <img
-          src={profile}
-          alt="Profile"
-          className=" rounded-full border border-gray-300 object w-10 h-10 object-cover"
-        />
+        <p
+          className=" rounded-full border items-center  flex justify-center w-10 h-10 text-2xl font-medium text-white bg-orange-500"
+        >{userData?.name?.charAt(0)}</p>
         <div>
-          <h2 className="text-md font-semibold">your.username (you)</h2>
+          <h2 className="text-md font-semibold">{userData.name}</h2>
           <p className="text-sm text-green-500">● Active</p>
         </div>
         <button className=" px-4 text-gray-500 hover:text-gray-700">

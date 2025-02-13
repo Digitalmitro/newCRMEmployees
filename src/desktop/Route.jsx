@@ -22,6 +22,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import NotificationPage from "./pages/Notification";
 import ForgotClock from "./pages/ForgotClock";
 import AddCoworkers from "./pages/AddCoworkers";
+import ChannelChat from "./pages/channelChat";
+
 
 function DesktopRouting() {
   return (
@@ -59,6 +61,8 @@ function DesktopRouting() {
                     <Route path="/concern" element={<Concern/>}/>
                     <Route path="/forgotClock" element={<ForgotClock/>}/>
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>
+                    <Route path="/addCoworker" element={<CreateChannel/>}/>
+                    <Route path="/channelchat" element={<ChannelChat/>}/>
 
                   </Routes>
                 </div>

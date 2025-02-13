@@ -6,12 +6,22 @@ import book from "../../../assets/desktop/book.svg";
 import calls from "../../../assets/desktop/calls.svg";
 import notes from "../../../assets/desktop/notes.svg";
 import sales from "../../../assets/desktop/sales.svg";
-import profile from "../../../assets/desktop/profileIcon.svg";
 import arrow from "../../../assets/desktop/arrow.svg";
 import edit from "../../../assets/desktop/edit.svg";
 import logo from "../../../assets/desktop/logo.svg";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
+
+const dummyChannel=[
+  {
+    _id: 1,
+    name: "project1",
+  },
+  {
+    _id: 2,
+    name: "project2",
+  },
+]
 function Sidebarpart() {
   const [employees, setEmployees] = useState([]);
   const { getAllUsers, userData } = useAuth();
@@ -36,10 +46,18 @@ function Sidebarpart() {
         name,id
       },
     });
+    console.log(name,id)
   };
   const handleChannel = () => {
     navigate("/create-channel");
   };
+  const handleChannelChat=(name,id)=>{
+    navigate("/channelchat",{
+      state: {
+        name,id
+      },
+    });
+  }
 
   return (
     <div className="  flex ">
@@ -94,7 +112,9 @@ function Sidebarpart() {
             </div>
           </Link>
           <div className="flex flex-col items-center">
-            <img src={profile} alt="" className="h-[35px] w-[35px]" />
+          <p
+          className=" rounded border items-center  flex justify-center w-10  text-2xl font-medium text-white bg-orange-600"
+        >{userData?.name?.charAt(0)}</p>
           </div>
         </nav>
       </div>
@@ -114,16 +134,15 @@ function Sidebarpart() {
             Channels <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            <li>
-              <Link to="#" className="block p-2 text-gray-700 text-[12px]">
-                Project 1
-              </Link>
+            {dummyChannel.map((channel)=>(
+              <li key={channel._id}>
+              <p className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={()=>handleChannelChat(channel.name,channel._id)}>
+                {channel.name}
+              </p>
             </li>
-            <li>
-              <Link to="#" className="block p-2 text-gray-700 text-[12px]">
-                Project 2
-              </Link>
-            </li>
+            ))
+              
+            }
             <li>
               <p
                 className="block p-2 text-gray-700 text-[10px] cursor-pointer"
