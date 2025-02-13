@@ -87,7 +87,7 @@ function AttendanceList() {
                   {moment(item?.firstPunchIn).format("HH:mm")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
-                  {moment(item?.punchOut).format("HH:mm")}
+                  {moment(item?.punchOut ? item?.punchOut: "0").format("HH:mm")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item?.status}
