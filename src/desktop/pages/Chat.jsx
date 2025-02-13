@@ -29,12 +29,9 @@ const Chat = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_API
-          }/message/messages/${senderId}/${receiverId}`
-        );
-        setMessages(res.data?.messages || []);
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/message/messages/${senderId}/${receiverId}`);
+        setMessages(res.data?.messages);
+        // console.log(res.data?.messages)
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
@@ -78,13 +75,9 @@ const Chat = () => {
     };
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/message/send-message`,
-        newMessage
-      );
-      sendMessage(receiverId, input);
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setInput("");
+      await axios.post(`${import.meta.env.VITE_BACKEND_API}/message/send-message`, newMessage);
+      sendMessage(senderId, receiverId, input); 
+      setInput(""); 
     } catch (error) {
       console.error("Error sending message:", error);
     }
