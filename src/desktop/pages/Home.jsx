@@ -26,12 +26,12 @@ function Home() {
   }
   const attendanceDates=dates.filter(items=>items.createdAt).length;
   const months = dates.map(items => moment(items?.currentDate).format("MMM"));
-  console.log("show this",attendanceDates)
+  
   useEffect(()=>{
     const getData=async()=>{
       const data=await fetchAttendance("this_month")
       if(data){
-        console.log("data this", data?.data?.[0]);
+        
         setDates(data?.data)
       }
     }

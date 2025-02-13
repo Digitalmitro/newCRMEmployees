@@ -97,7 +97,7 @@ function AddChannelPeople() {
 
       {/* Create Button */}
       <div className="flex justify-end">
-      <button className="text-[12px] text-orange-400 border border-orange-400 rounded px-3 cursor-pointer" onClick={handlePeople}>
+      <button className="text-[12px] text-orange-400 border border-orange-400 rounded px-3 cursor-pointer" >
         Create
       </button>
       </div>

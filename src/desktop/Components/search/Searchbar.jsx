@@ -4,11 +4,14 @@ import notificationIcon from "../../../assets/desktop/bell.png"; // Notification
 import { IoIosClose } from "react-icons/io";
 import logo from "../../../assets/desktop/logo.svg"
 import { onNotificationReceived } from "../../../utils/socket";
+import { MdLogout } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 function Searchbar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notification, setNotification] = useState([]);
   const token = localStorage.getItem("token");
+  const navigate=useNavigate();
   useEffect(() => {
     onNotificationReceived((notification) => {
       setNotification((prev) => [notification, ...prev]); // Add new notification
@@ -18,7 +21,13 @@ function Searchbar() {
  
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
+    setUnreadCount(0)
   };
+
+  const handleLogout=()=>{
+    localStorage.removeItem("token");
+    navigate("/login")
+  }
 
 
   const removeNotification=(index)=>{
@@ -38,7 +47,6 @@ function Searchbar() {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("notification", data?.notifications);
           setNotification(data?.notifications);
         }
       } catch (error) {
@@ -61,6 +69,7 @@ function Searchbar() {
       </div>
 
       {/* Notification Icon */}
+      <div className="flex gap-4">
       <div className="relative cursor-pointer" onClick={toggleSidebar}>
         <img src={notificationIcon} alt="Notifications" className="w-6 h-6" />
         {unreadCount > 0 && (
@@ -68,6 +77,11 @@ function Searchbar() {
             {unreadCount}
           </span>
         )}
+      </div>
+      {/* logout */}
+      <div className="cursor-pointer" onClick={handleLogout}>
+      <MdLogout size={25}/>
+      </div>
       </div>
 
       {/* Notification Sidebar */}
@@ -107,6 +121,8 @@ function Searchbar() {
       )}
     </div>
       </div>
+
+      
 
       {/* Overlay to close sidebar */}
       {isSidebarOpen && (
