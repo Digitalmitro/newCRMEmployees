@@ -91,7 +91,7 @@ const Chat = () => {
             className={`p-2 max-w-xs rounded-lg mb-2
               ${msg.sender === senderId ? "bg-orange-500 text-white ml-auto" : "bg-gray-700 text-white"}
             `}
-            style={{ width: `${Math.min(msg.message.length * 10, 300)}px` }}
+            style={{ width: `${Math.min(msg.message.length * 20, 300)}px` }}
           >
             {msg.message}
           </div>
