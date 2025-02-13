@@ -2,25 +2,26 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import profile from "../../assets/desktop/profileIcon.svg";
 import { Send } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { sendMessage, onMessageReceived, connectSocket } from "../../utils/socket";
-import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../../context/authContext";
 
-const Chat = ({  }) => {
-const receiverId ="67a5d6d40ad94b67cea603bf"
+const Chat = () => {
+  const location=useLocation()
+  const user = location.state;
+  const receiverId= user?.id
+  const { userData } = useAuth();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null); // For auto-scrolling
-
-  // ✅ Decode token to get senderId
-  const token = localStorage.getItem("token");
-  const senderId = token ? jwtDecode(token).userId : null;
+  const senderId = userData?.userId
 
   // ✅ Load chat history on mount
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/message/messages/${senderId}/${receiverId}`);
-        setMessages(res.data.messages);
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/message/messages/${senderId}/${receiverId}`);
+        setMessages(res.data?.messages);
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
@@ -29,11 +30,9 @@ const receiverId ="67a5d6d40ad94b67cea603bf"
     if (senderId && receiverId) {
       fetchMessages();
     }
-
-    // ✅ Connect socket
+ 
     connectSocket();
 
-    // ✅ Listen for new messages
     onMessageReceived((newMessage) => {
       if (
         (newMessage.sender === senderId && newMessage.receiver === receiverId) ||
@@ -48,22 +47,22 @@ const receiverId ="67a5d6d40ad94b67cea603bf"
     };
   }, [senderId, receiverId]);
 
-  // ✅ Auto-scroll to bottom when messages update
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ✅ Send message via API & Socket.io
+
   const handleSendMessage = async () => {
     if (!input.trim()) return;
 
     const newMessage = { sender: senderId, receiver: receiverId, message: input };
 
     try {
-      await axios.post("http://localhost:5000/message/send-message", newMessage); // Save to DB
-      sendMessage(receiverId, input); // Emit to Socket.io
-      setMessages((prevMessages) => [...prevMessages, newMessage]); // Update UI
-      setInput(""); // Clear input
+      await axios.post(`${import.meta.env.VITE_BACKEND_API}/message/send-message`, newMessage);
+      sendMessage(receiverId, input); 
+      setMessages((prevMessages) => [...prevMessages, newMessage]); 
+      setInput(""); 
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -79,14 +78,14 @@ const receiverId ="67a5d6d40ad94b67cea603bf"
           className="rounded-full border border-gray-300 w-10 h-10 object-cover"
         />
         <div>
-          <h2 className="text-sm font-semibold">Chat</h2>
+          <h2 className="text-sm font-semibold">{user?.name}</h2>
           <p className="text-[10px] text-green-500 font-semibold">Active</p>
         </div>
       </div>
 
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
-        {messages?.map((msg, index) => (
+        {messages.map((msg, index) => (
           <div
             key={index}
             className={`p-2 max-w-xs rounded-lg mb-2

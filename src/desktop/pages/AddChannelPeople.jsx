@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import search from "../../assets/desktop/search.svg";
 import { IoIosClose } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,8 @@ const dummyPeople = [
   "Sagar",
   "Sayani"
 ];
+
+
 
 
 
