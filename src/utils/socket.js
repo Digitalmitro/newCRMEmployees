@@ -1,6 +1,6 @@
 // src/utils/socket.js
 import { io } from "socket.io-client";
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 import logo from "../assets/desktop/logo.svg"
 
 const socket = io(`${import.meta.env.VITE_BACKEND_API}`, { autoConnect: false, reconnection: true });
@@ -62,12 +62,12 @@ export const connectSocket = () => {
 };
 
 // Function to send a real-time message
-export const sendMessage = (receiver, message) => {
+export const sendMessage = (sender,receiver, message) => {
   const token = localStorage.getItem("token");
   if (!token) return;
 
   try {
-    const sender = jwtDecode(token).userId;
+    // const sender = jwtDecode(token).userId;
     socket.emit("send-message", { sender, receiver, message });
   } catch (error) {
     console.error("Error decoding token:", error);
@@ -82,7 +82,7 @@ export const sendNotification = (userId, title, description) => {
 
 // Listen for incoming messages
 export const onMessageReceived = (callback) => {
-  socket.on("receive-message", (message) => {
+  socket.on("new-message", (message) => {
     callback(message);
   });
 };

@@ -60,14 +60,14 @@ const Chat = () => {
 
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_API}/message/send-message`, newMessage);
-      sendMessage(receiverId, input); 
+      sendMessage(senderId, receiverId, input); 
       setMessages((prevMessages) => [...prevMessages, newMessage]); 
       setInput(""); 
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
-
+// console.log(messages)
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
       {/* Chat Header */}
