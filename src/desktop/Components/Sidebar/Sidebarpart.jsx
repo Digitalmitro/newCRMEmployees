@@ -10,20 +10,41 @@ import profile from "../../../assets/desktop/profileIcon.svg";
 import arrow from "../../../assets/desktop/arrow.svg";
 import edit from "../../../assets/desktop/edit.svg";
 import logo from "../../../assets/desktop/logo.svg";
+import { useAuth } from "../../../context/authContext";
+import { useEffect, useState } from "react";
 function Sidebarpart() {
-  const navigate=useNavigate()
-  const handleChat=()=>{
-    navigate("/chat")
-  }
-  const handleChannel=()=>{
-    navigate("/create-channel")
-  }
+  const [employees, setEmployees] = useState([]);
+  const { getAllUsers, userData } = useAuth();
+
+  useEffect(() => {
+    const allUsers = async () => {
+      const users = await getAllUsers();
+
+      setEmployees(users);
+    };
+    allUsers();
+  }, []);
+
+  console.log("all users", employees);
+
+  const navigate = useNavigate();
+  const handleChat = (name,id) => {
+    navigate("/chat", {
+      state: {
+        name,id
+      },
+    });
+  };
+  const handleChannel = () => {
+    navigate("/create-channel");
+  };
+
   return (
     <div className="  flex ">
       <div className="px-3 pt-2 border border-orange-400">
         {/* Navigation Links */}
         <nav className="flex flex-col gap-1  items-center">
-        <Link to="/" className="flex items-center">
+          <Link to="/" className="flex items-center">
             <div className="flex flex-col items-center">
               <img src={logo} alt="" className="h-[70px] w-[70px]" />
             </div>
@@ -79,7 +100,8 @@ function Sidebarpart() {
       <div className="bg-gray-200 w-[300px] p-4 border border-orange-400">
         <div className="flex justify-between pt-4 mb-4">
           <h2 className="text-[15px] font-medium   flex gap-2">
-            Twinkle <img src={arrow} alt="" className="w-[8px] pt-1" />
+            {userData?.name}
+            <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h2>
           <img src={edit} alt="" className="w-[10px] h-[10px]" />
         </div>
@@ -101,7 +123,10 @@ function Sidebarpart() {
               </Link>
             </li>
             <li>
-              <p className="block p-2 text-gray-700 text-[10px] cursor-pointer" onClick={handleChannel}>
+              <p
+                className="block p-2 text-gray-700 text-[10px] cursor-pointer"
+                onClick={handleChannel}
+              >
                 + Add Channels
               </p>
             </li>
@@ -114,13 +139,17 @@ function Sidebarpart() {
             Messages <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            <li className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={handleChat}>
-              Twinkle shaw
-            </li>
-            <li>
-              <p className="block p-2 text-gray-700 text-[10px]">
-                + Add Coworkers
-              </p>
+            {employees.map((user, i) => (
+              <li
+                key={i}
+                className="block p-2 text-gray-700 text-[12px] cursor-pointer"
+                onClick={() => handleChat(user.name, user._id)}
+              >
+                {user.name}
+              </li>
+            ))}
+            <li className="block p-2 text-gray-700 text-[12px] cursor-pointer">
+              + Add Coworker
             </li>
           </ul>
         </div>

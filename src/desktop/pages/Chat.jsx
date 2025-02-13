@@ -1,8 +1,12 @@
 import { useState } from "react";
 import profile from "../../assets/desktop/profileIcon.svg";
 import { Send } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 function Chat() {
+  const location=useLocation()
+  const user = location.state;
+  console.log("chat",user)
     const [messages, setMessages] = useState([
         { id: 1, text: "Hello! How can I help you?", sender: "bot" },
       ]);
@@ -25,7 +29,7 @@ function Chat() {
           className=" rounded-full border items-center border-gray-300 object w-10 h-10 object-cover"
         />
         <div>
-          <h2 className="text-sm font-semibold">your.username (you)</h2>
+          <h2 className="text-sm font-semibold">{user.name}</h2>
           <p className="text-[10px] text-green-500 font-semibold">Active</p>
         </div>
       
