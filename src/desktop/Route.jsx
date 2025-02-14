@@ -22,7 +22,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import NotificationPage from "./pages/Notification";
 import ForgotClock from "./pages/ForgotClock";
 import AddCoworkers from "./pages/AddCoworkers";
-import ChannelChat from "./pages/channelChat";
+import ChannelChat from "./pages/ChannelChat";
 
 
 function DesktopRouting() {
