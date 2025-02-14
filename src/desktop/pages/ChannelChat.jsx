@@ -3,13 +3,14 @@ import { IoPeopleSharp } from "react-icons/io5";
 import { Send } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
-import { onChannelMessageReceived, sendChannelMessage } from "../../utils/socket"; // Socket functions
-import axios from "axios"; 
 import { useAuth } from "../../context/authContext";
+import { onChannelMessageReceived, sendChannelMessage,joinChannel } from "../../utils/socket"; // Socket functions
+import axios from "axios"; 
+
 const ChannelChat = () => {
+  const {userData}=useAuth()
   const location = useLocation();
   const groupUsers = location.state;
-  const { userData } = useAuth();
   const senderId = userData?.userId;
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -19,7 +20,7 @@ const ChannelChat = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/channels/${'67aefb63cb07771d7bbd81f8'}`);
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/channels/${groupUsers.id}`);
         setMessages(res.data.messages);
       } catch (error) {
         console.error("❌ Error fetching channel messages:", error);
@@ -27,6 +28,7 @@ const ChannelChat = () => {
     };
 
     fetchMessages();
+    joinChannel(groupUsers.id)
   }, [groupUsers.id]);
 
   // ✅ Listen for new messages via Socket.io
@@ -46,14 +48,14 @@ const ChannelChat = () => {
 
     const newMessage = {
       sender: senderId, // Replace with actual user ID
-      channelId: '67aefb63cb07771d7bbd81f8',
+      channelId:groupUsers.id,
       message: input,
       createdAt: new Date(),
     };
 
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
-      sendChannelMessage(newMessage.sender, '67aefb63cb07771d7bbd81f8', newMessage.message);
+      sendChannelMessage(newMessage.channelId,newMessage.sender,newMessage.message);
       setMessages([...messages, newMessage]); // Optimistic UI update
       setInput("");
     } catch (error) {
@@ -84,12 +86,17 @@ const ChannelChat = () => {
 
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
-        {messages.map((msg, index) => (
+        {messages.map((msg) => (
+          <div key={msg.id}>
+            {/* <div className="flex gap-2 mb-2">
+            <span className="text-white text-[13px] bg-black font-medium rounded-full w-5 h-5 px-2 items-center flex justify-center">{userData?.name?.charAt(0)}</span>
+            <p className="text-[12px]">{userData?.name}</p>
+            </div> */}
           <div
-            key={index}
-            className={`pt-2 pb-2 px-4 max-w-xs rounded-lg mb-2 flex flex-col 
+            
+            className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
             ${
-              msg.sender === "me"
+              msg.sender === senderId
                 ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
                 : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
             }`}
@@ -100,11 +107,16 @@ const ChannelChat = () => {
                   : Math.min((msg.message?.length ?? 0) * 15, 300)
               }px`,
             }}
-          >
+          > 
+          
+          <div className="flex gap-2">
+           
             <span>{msg.message}</span>
+          </div>
             <span className="text-[9px] flex justify-end">
               {moment(msg.createdAt).format("HH:mm")}
             </span>
+          </div>
           </div>
         ))}
         <div ref={messagesEndRef} />

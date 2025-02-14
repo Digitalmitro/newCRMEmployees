@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate, Route, Router, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Sidebarpart from "./Components/Sidebar/Sidebarpart";
 import Attendance from "./pages/Attendance";
