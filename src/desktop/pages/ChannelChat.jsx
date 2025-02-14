@@ -3,18 +3,22 @@ import { IoPeopleSharp } from "react-icons/io5";
 import { Send } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
+import { BsEmojiSmile } from "react-icons/bs";
+import EmojiPicker from "emoji-picker-react";
+import { IoMdShareAlt } from "react-icons/io";
 import { useAuth } from "../../context/authContext";
 
 const ChannelChat = () => {
-  const {userData}=useAuth()
+  const { userData } = useAuth();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [messages, setMessages] = useState([
     { id: 1, sender: "me", message: "Hello!", createdAt: new Date() },
     { id: 2, sender: "you", message: "Hi there!", createdAt: new Date() },
   ]);
-  const location=useLocation()
-  const groupUsers=location.state;
-  console.log(groupUsers)
-  
+  const location = useLocation();
+  const groupUsers = location.state;
+  console.log(groupUsers);
+
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
@@ -34,58 +38,71 @@ const ChannelChat = () => {
     setInput("");
   };
 
+  const handleEmojiClick = (emojiData) => {
+    setInput((prev) => prev + emojiData.emoji);
+
+    setTimeout(() => {
+      document.getElementById("chatInput").focus();
+    }, 0);
+  };
+
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
       {/* Header */}
-      <div className="flex gap-4 mb-6 border-b pt-2 px-8 pb-2">
-        <div className="flex items-center gap-4 ">
-          <p className=" rounded-full border items-center text-[12px] flex justify-center w-10 h-10  font-medium text-white bg-orange-500">
-            Group
-          </p>
+      <div className="flex  justify-between mb-6 border-b pt-2 px-8 pb-2 w-full">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-4 ">
+            <p className=" rounded-full border items-center text-[12px] flex justify-center w-10 h-10  font-medium text-white bg-orange-500">
+              Group
+            </p>
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold">
+              {groupUsers.name.charAt(0).toUpperCase() +
+                groupUsers.name.slice(1)}
+            </h2>
+            <p className="text-[10px] text-green-500 font-semibold">Active</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <IoPeopleSharp />
+            <p className="text[10px]">(2)</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-sm font-semibold">{groupUsers.name.charAt(0).toUpperCase() + groupUsers.name.slice(1)}</h2>
-          <p className="text-[10px] text-green-500 font-semibold">Active</p>
+        <div className="flex">
+          <IoMdShareAlt />
         </div>
-       <div className="flex items-center space-x-2">
-       <IoPeopleSharp />
-       <p className="text[10px]">(2)</p>
-       </div>
       </div>
 
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
         {messages.map((msg) => (
           <div key={msg.id}>
-            {/* <div className="flex gap-2 mb-2">
-            <span className="text-white text-[13px] bg-black font-medium rounded-full w-5 h-5 px-2 items-center flex justify-center">{userData?.name?.charAt(0)}</span>
-            <p className="text-[12px]">{userData?.name}</p>
-            </div> */}
-          <div
-            
-            className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
+            <div
+              className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
             ${
               msg.sender === "me"
                 ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
                 : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
             }`}
-            style={{
-              width: `${
-                msg.message.length <= 5
-                  ? 90
-                  : Math.min((msg.message?.length ?? 0) * 15, 300)
-              }px`,
-            }}
-          > 
-          
-          <div className="flex gap-2">
-           
-            <span>{msg.message}</span>
-          </div>
-            <span className="text-[9px] flex justify-end">
-              {moment(msg.createdAt).format("HH:mm")}
-            </span>
-          </div>
+              style={{
+                width: `${
+                  msg.message.length <= 5
+                    ? 90
+                    : Math.min((msg.message?.length ?? 0) * 15, 300)
+                }px`,
+              }}
+            >
+              <div className="flex gap-2 mb-2">
+                <p className="text-[10px]">{userData?.name?.split(" ")[0]}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <span>{msg.message}</span>
+              </div>
+              <span className="text-[9px] flex justify-end">
+                {moment(msg.createdAt).format("HH:mm")}
+              </span>
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -93,6 +110,17 @@ const ChannelChat = () => {
 
       {/* Message Input */}
       <div className="p-4 bg-white flex items-center border-t fixed bottom-0 w-[65%] space-x-2">
+        <div className="relative">
+          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+            <BsEmojiSmile size={22} className="cursor-pointer text-gray-500" />
+          </button>
+
+          {showEmojiPicker && (
+            <div className="absolute bottom-10 left-0 z-50">
+              <EmojiPicker onEmojiClick={handleEmojiClick} />
+            </div>
+          )}
+        </div>
         <input
           type="text"
           className="flex-1 p-2 border rounded-lg outline-none text-[15px] w-full"
