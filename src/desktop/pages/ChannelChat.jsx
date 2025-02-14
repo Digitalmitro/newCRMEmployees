@@ -3,8 +3,10 @@ import { IoPeopleSharp } from "react-icons/io5";
 import { Send } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
+import { useAuth } from "../../context/authContext";
 
 const ChannelChat = () => {
+  const {userData}=useAuth()
   const [messages, setMessages] = useState([
     { id: 1, sender: "me", message: "Hello!", createdAt: new Date() },
     { id: 2, sender: "you", message: "Hi there!", createdAt: new Date() },
@@ -53,9 +55,14 @@ const ChannelChat = () => {
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
         {messages.map((msg) => (
+          <div key={msg.id}>
+            {/* <div className="flex gap-2 mb-2">
+            <span className="text-white text-[13px] bg-black font-medium rounded-full w-5 h-5 px-2 items-center flex justify-center">{userData?.name?.charAt(0)}</span>
+            <p className="text-[12px]">{userData?.name}</p>
+            </div> */}
           <div
-            key={msg.id}
-            className={`pt-2 pb-2 px-4 max-w-xs rounded-lg mb-2 flex flex-col 
+            
+            className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
             ${
               msg.sender === "me"
                 ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
@@ -68,11 +75,16 @@ const ChannelChat = () => {
                   : Math.min((msg.message?.length ?? 0) * 15, 300)
               }px`,
             }}
-          >
+          > 
+          
+          <div className="flex gap-2">
+           
             <span>{msg.message}</span>
+          </div>
             <span className="text-[9px] flex justify-end">
               {moment(msg.createdAt).format("HH:mm")}
             </span>
+          </div>
           </div>
         ))}
         <div ref={messagesEndRef} />

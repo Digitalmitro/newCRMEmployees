@@ -24,6 +24,7 @@ const dummyChannel=[
 ]
 function Sidebarpart() {
   const [employees, setEmployees] = useState([]);
+  const [channels, setChannels] = useState([]);
   const { getAllUsers, userData } = useAuth();
 
   useEffect(() => {
@@ -32,6 +33,16 @@ function Sidebarpart() {
 
       setEmployees(users);
     };
+
+    const getChannels=async()=>{
+      const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/api/all`)
+      if(response.ok){
+        const data=await response.json();
+        setChannels(data)
+        
+      }
+    }
+    getChannels()
     allUsers();
   }, []);
 
@@ -58,6 +69,8 @@ function Sidebarpart() {
       },
     });
   }
+
+  
 
   return (
     <div className="  flex ">
@@ -134,7 +147,7 @@ function Sidebarpart() {
             Channels <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            {dummyChannel.map((channel)=>(
+            {channels.map((channel)=>(
               <li key={channel._id}>
               <p className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={()=>handleChannelChat(channel.name,channel._id)}>
                 {channel.name}
