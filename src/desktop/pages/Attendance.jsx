@@ -7,7 +7,7 @@ import moment from "moment";
 function Attendance() {
   const { token, fetchAttendance,userData } = useAuth();
   const [isClockedOut, setIsClockedOut] = useState(true);
-  console.log(userData?.name?.charAt(0))
+  // console.log(userData?.name?.charAt(0))
   const navigate = useNavigate();
   const opeAttendancelist = () => {
     navigate("/attendance-list");
@@ -21,6 +21,7 @@ function Attendance() {
   const handleBookLeave = () => {
     navigate("/book-leave");  };
   const [attendanceData, setAttendanceData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const duration = moment.duration(attendanceData?.workingTime, "minutes");
   const clockinTime = attendanceData?.firstPunchIn ? moment(attendanceData?.firstPunchIn).format("HH:mm"): "00:00";
   const clockoutTime =attendanceData?.punchOut ? moment(attendanceData?.punchOut).format("HH:mm"):"00:00";
@@ -58,6 +59,7 @@ function Attendance() {
       console.error("No token available!");
       return;
     }
+    setLoading(true);
     const apiUrl = isClockedOut
       ? `${import.meta.env.VITE_BACKEND_API}/attendance/punch-in`
       : `${import.meta.env.VITE_BACKEND_API}/attendance/punch-out`;
@@ -75,14 +77,11 @@ function Attendance() {
         }),
       });
 
-      if (response) {
-        const data = await response.json();
-        
-      }
      getAttendance()
     } catch (error) {
       console.error("Error in punch-in API:", error);
     }
+    setLoading(false);
   };
 
   return (
@@ -108,6 +107,11 @@ function Attendance() {
           Click the button below to clock in.
         </p>
         <div className="space-x-5">
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
+            <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )}
           <button
             className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
             onClick={handlePunch}

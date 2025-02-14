@@ -74,6 +74,13 @@ export const sendMessage = (sender,receiver, message) => {
   }
 };
 
+// Listen for user status updates (online/offline)
+export const onUserStatusUpdate = (callback) => {
+  socket.on("updateUserStatus", ({ userId, status }) => {
+    callback({ userId, status });
+  });
+};
+
 // ✅ Join a channel
 export const joinChannel = (channelId) => {
   socket.emit("joinChannel", channelId);
