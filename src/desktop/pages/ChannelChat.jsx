@@ -3,58 +3,90 @@ import { IoPeopleSharp } from "react-icons/io5";
 import { Send } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
-
+import { onChannelMessageReceived, sendChannelMessage } from "../../utils/socket"; // Socket functions
+import axios from "axios"; 
+import { useAuth } from "../../context/authContext";
 const ChannelChat = () => {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "me", message: "Hello!", createdAt: new Date() },
-    { id: 2, sender: "you", message: "Hi there!", createdAt: new Date() },
-  ]);
-  const location=useLocation()
-  const groupUsers=location.state;
-  
+  const location = useLocation();
+  const groupUsers = location.state;
+  const { userData } = useAuth();
+  const senderId = userData?.userId;
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
+
+  // ✅ Fetch channel messages when component mounts
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/channels/${'67aefb63cb07771d7bbd81f8'}`);
+        setMessages(res.data.messages);
+      } catch (error) {
+        console.error("❌ Error fetching channel messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [groupUsers.id]);
+
+  // ✅ Listen for new messages via Socket.io
+  useEffect(() => {
+    onChannelMessageReceived((newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = () => {
+  // ✅ Handle sending a message
+  const handleSendMessage = async () => {
     if (!input.trim()) return;
+
     const newMessage = {
-      id: messages.length + 1,
-      sender: "me",
+      sender: senderId, // Replace with actual user ID
+      channelId: '67aefb63cb07771d7bbd81f8',
       message: input,
       createdAt: new Date(),
     };
-    setMessages([...messages, newMessage]);
-    setInput("");
+
+    try {
+      await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
+      sendChannelMessage(newMessage.sender, '67aefb63cb07771d7bbd81f8', newMessage.message);
+      setMessages([...messages, newMessage]); // Optimistic UI update
+      setInput("");
+    } catch (error) {
+      console.error("❌ Error sending message:", error);
+    }
   };
 
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
       {/* Header */}
       <div className="flex gap-4 mb-6 border-b pt-2 px-8 pb-2">
-        <div className="flex items-center gap-4 ">
-          <p className=" rounded-full border items-center text-[12px] flex justify-center w-10 h-10  font-medium text-white bg-orange-500">
+        <div className="flex items-center gap-4">
+          <p className="rounded-full border items-center text-[12px] flex justify-center w-10 h-10 font-medium text-white bg-orange-500">
             Group
           </p>
         </div>
         <div>
-          <h2 className="text-sm font-semibold">{groupUsers.name.charAt(0).toUpperCase() + groupUsers.name.slice(1)}</h2>
+          <h2 className="text-sm font-semibold">
+            {groupUsers.name.charAt(0).toUpperCase() + groupUsers.name.slice(1)}
+          </h2>
           <p className="text-[10px] text-green-500 font-semibold">Active</p>
         </div>
-       <div className="flex items-center space-x-2">
-       <IoPeopleSharp />
-       <p className="text[10px]">(2)</p>
-       </div>
+        <div className="flex items-center space-x-2">
+          <IoPeopleSharp />
+          <p className="text[10px]">(2)</p>
+        </div>
       </div>
 
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
-        {messages.map((msg) => (
+        {messages.map((msg, index) => (
           <div
-            key={msg.id}
+            key={index}
             className={`pt-2 pb-2 px-4 max-w-xs rounded-lg mb-2 flex flex-col 
             ${
               msg.sender === "me"
