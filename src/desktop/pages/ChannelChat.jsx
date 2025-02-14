@@ -13,8 +13,19 @@ const ChannelChat = () => {
   const groupUsers = location.state;
   const senderId = userData?.userId;
   const [messages, setMessages] = useState([]);
+  const [channelInfo, setChannelsInfo] = useState()
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
+
+  const fetchChannelsInfo = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/${groupUsers.id}`);
+      setChannelsInfo(res.data);
+    } catch (error) {
+      console.error("❌ Error fetching channel:", error);
+    }
+  };
+
 
   // ✅ Fetch channel messages when component mounts
   useEffect(() => {
@@ -29,6 +40,7 @@ const ChannelChat = () => {
 
     fetchMessages();
     joinChannel(groupUsers.id)
+    fetchChannelsInfo()
   }, [groupUsers.id]);
 
   // ✅ Listen for new messages via Socket.io
@@ -80,7 +92,7 @@ const ChannelChat = () => {
         </div>
         <div className="flex items-center space-x-2">
           <IoPeopleSharp />
-          <p className="text[10px]">(2)</p>
+          <p className="text[10px]">({channelInfo?.members.length})</p>
         </div>
       </div>
 

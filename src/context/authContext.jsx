@@ -73,10 +73,18 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const getChannels=async()=>{
+        const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/api/all`)
+        if(response.ok){
+          const data=await response.json();
+          return data
+         
+        }
+      }
 
 
     return (
-        <AuthContext.Provider value={{ token, setToken,userData, fetchAttendance,getAllUsers }}>
+        <AuthContext.Provider value={{ token, setToken,userData, getChannels, fetchAttendance,getAllUsers }}>
             {children}
         </AuthContext.Provider>
     );

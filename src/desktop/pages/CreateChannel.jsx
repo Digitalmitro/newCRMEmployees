@@ -10,6 +10,7 @@ function CreateChannel() {
     navigate("/addpeople-channel", {
       state: {
         channelName,
+
       },
     });
   };
