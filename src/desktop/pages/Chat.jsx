@@ -96,11 +96,7 @@ const Chat = () => {
     <div className="p-4 w-full flex flex-col h-[500px]">
 
       <div className="flex gap-4 mb-6 border-b pt-2 px-8 pb-2">
-        <img
-          src={profile}
-          alt="Profile"
-          className="rounded-full border border-gray-300 w-10 h-10 object-cover"
-        />
+        <p className=" rounded-full border items-center  flex justify-center w-10 h-10 text-xl  text-white bg-orange-500">{user?.name?.charAt(0)}</p>
         <div>
           <h2 className="text-sm font-semibold">{user?.name}</h2>
           <p className="text-[10px] text-green-500 font-semibold">Active</p>

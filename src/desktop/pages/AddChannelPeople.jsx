@@ -5,7 +5,7 @@ import { useAuth } from "../../context/authContext";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function AddChannelPeople() {
-  const { getAllUsers } = useAuth();
+  const { getAllUsers,getChannels } = useAuth();
   const [members,setMembers]=useState([])
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPeople, setSelectedPeople] = useState([]);
@@ -34,7 +34,8 @@ function AddChannelPeople() {
       } catch (error) {
         console.log(error)
       }
-      navigate("/home")
+      navigate("/")
+      getChannels()
   }
 
   

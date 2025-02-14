@@ -12,17 +12,9 @@ import logo from "../../../assets/desktop/logo.svg";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
 
-const dummyChannel=[
-  {
-    _id: 1,
-    name: "project1",
-  },
-  {
-    _id: 2,
-    name: "project2",
-  },
-]
+
 function Sidebarpart() {
+  const {getChannels}=useAuth()
   const [employees, setEmployees] = useState([]);
   const [channels, setChannels] = useState([]);
   const { getAllUsers, userData } = useAuth();
@@ -34,15 +26,11 @@ function Sidebarpart() {
       setEmployees(users);
     };
 
-    const getChannels=async()=>{
-      const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/api/all`)
-      if(response.ok){
-        const data=await response.json();
-        setChannels(data)
-        
-      }
+    const channel=async()=>{
+      const data=await getChannels()
+      setChannels(data)
     }
-    getChannels()
+    channel()
     allUsers();
   }, []);
 

@@ -13,6 +13,7 @@ const ChannelChat = () => {
   ]);
   const location=useLocation()
   const groupUsers=location.state;
+  console.log(groupUsers)
   
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
