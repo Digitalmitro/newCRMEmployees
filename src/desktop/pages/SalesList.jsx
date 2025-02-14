@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import moment from "moment";
 
 function SalesList() {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ function SalesList() {
     };
     fetchSalesList();
   }, [currentPage]); 
+
   
 
   const handleNavigate = () => {
@@ -84,7 +85,7 @@ function SalesList() {
             {sales.map((item, index) => (
               <tr key={index} className="text-[13px] text-gray-500">
                 <td className="border border-gray-300 px-4 py-2  text-center">
-                  {item.createdDate}
+                {moment(item.createdAt).format("YYYY-MM-DD")}
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item.name}

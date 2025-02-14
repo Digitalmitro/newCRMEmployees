@@ -1,6 +1,6 @@
   import { useNavigate } from "react-router-dom";
   import { useState, useEffect } from "react";
-  
+  import moment from "moment";
   function TransferList() {
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -68,7 +68,7 @@
           <tbody>
             {data.map((item, index) => (
               <tr key={index} className="text-[13px] text-gray-500 text-center">
-                <td className="border px-3 py-2">{item.createdDate}</td>
+                <td className="border px-3 py-2">{moment(item.createdAt).format("YYYY-MM-DD")}</td>
                 {/* <td className="border px-3 py-2">{item.createdBy}</td> */}
                 <td className="border px-3 py-2">{item.name}</td>
                 <td className="border px-3 py-2">{item.email}</td>
