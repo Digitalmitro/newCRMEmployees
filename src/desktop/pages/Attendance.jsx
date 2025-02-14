@@ -5,26 +5,27 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
 function Attendance() {
-  const { token, fetchAttendance,userData } = useAuth();
+  const { token, fetchAttendance, userData } = useAuth();
   const [isClockedOut, setIsClockedOut] = useState(true);
   // console.log(userData?.name?.charAt(0))
   const navigate = useNavigate();
   const opeAttendancelist = () => {
     navigate("/attendance-list");
   };
-  const handleForgot=()=>{
+  const handleForgot = () => {
     navigate("/forgotClock");
   }
-  const handleConcern=()=>{
+  const handleConcern = () => {
     navigate("/concern");
   }
   const handleBookLeave = () => {
-    navigate("/book-leave");  };
+    navigate("/book-leave");
+  };
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const duration = moment.duration(attendanceData?.workingTime, "minutes");
-  const clockinTime = attendanceData?.firstPunchIn ? moment(attendanceData?.firstPunchIn).format("HH:mm"): "00:00";
-  const clockoutTime =attendanceData?.punchOut ? moment(attendanceData?.punchOut).format("HH:mm"):"00:00";
+  const clockinTime = attendanceData?.firstPunchIn ? moment(attendanceData?.firstPunchIn).format("HH:mm") : "00:00";
+  const clockoutTime = attendanceData?.punchOut ? moment(attendanceData?.punchOut).format("HH:mm") : "00:00";
   const getAttendance = async () => {
     const data = await fetchAttendance("today");
     if (data) {
@@ -35,7 +36,7 @@ function Attendance() {
   useEffect(() => {
     getAttendance();
   }, []);
-  const [clientIp, setClientIp] = useState(""); 
+  const [clientIp, setClientIp] = useState("");
   useEffect(() => {
     const fetchIpAddress = async () => {
       try {
@@ -53,7 +54,7 @@ function Attendance() {
 
     fetchIpAddress();
   }, []);
- 
+
   const handlePunch = async () => {
     if (!token) {
       console.error("No token available!");
@@ -63,7 +64,7 @@ function Attendance() {
     const apiUrl = isClockedOut
       ? `${import.meta.env.VITE_BACKEND_API}/attendance/punch-in`
       : `${import.meta.env.VITE_BACKEND_API}/attendance/punch-out`;
-      // console.log( token)
+    // console.log( token)
 
     try {
       const response = await fetch(apiUrl, {
@@ -77,7 +78,7 @@ function Attendance() {
         }),
       });
 
-     getAttendance()
+      getAttendance()
     } catch (error) {
       console.error("Error in punch-in API:", error);
     }
@@ -107,11 +108,12 @@ function Attendance() {
           Click the button below to clock in.
         </p>
         <div className="space-x-5">
-        {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-50">
-            <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
+          {loading && (
+            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+              <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
           <button
             className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
             onClick={handlePunch}
@@ -124,34 +126,34 @@ function Attendance() {
         </div>
       </div>
 
-    {/* Work Details */}
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 shadow-md rounded-lg text-sm">
-      <div>
-        <p className="text-gray-500 text-sm">Clock In:</p>
-        <p className="font-semibold ">{clockinTime}</p>
+      {/* Work Details */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-white p-6 shadow-md rounded-lg text-sm">
+        <div>
+          <p className="text-gray-500 text-sm">Clock In:</p>
+          <p className="font-semibold ">{clockinTime}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">Clock Out:</p>
+          <p className="font-semibold">{clockoutTime}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">Working Time:</p>
+          <p className="font-semibold">{`${duration.hours()}h ${duration.minutes()}m`}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">IP Address:</p>
+          <p className="font-semibold">{attendanceData?.ip
+          }</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">Status:</p>
+          <p className="font-semibold text-green-500">{attendanceData?.status}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 text-sm">Work Status:</p>
+          <p className="font-semibold">{attendanceData?.workStatus}</p>
+        </div>
       </div>
-      <div>
-        <p className="text-gray-500 text-sm">Clock Out:</p>
-        <p className="font-semibold">{clockoutTime}</p>
-      </div>
-      <div>
-        <p className="text-gray-500 text-sm">Working Time:</p>
-        <p className="font-semibold">{`${duration.hours()}h ${duration.minutes()}m`}</p>
-      </div>
-      <div>
-        <p className="text-gray-500 text-sm">IP Address:</p>
-        <p className="font-semibold">{attendanceData?.ip
-}</p>
-      </div>
-      <div>
-        <p className="text-gray-500 text-sm">Status:</p>
-        <p className="font-semibold text-green-500">{attendanceData?.status}</p>
-      </div>
-      <div>
-        <p className="text-gray-500 text-sm">Work Status:</p>
-        <p className="font-semibold">{attendanceData?.workStatus}</p>
-      </div>
-    </div>
 
       {/* Action Buttons */}
       <div className="flex flex-wrap justify-center gap-4 mt-6">
@@ -162,7 +164,7 @@ function Attendance() {
           + Book Leave
         </button>
         <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleForgot}>
-        Forgot to Clock
+          Forgot to Clock
         </button>
         <button
           className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"

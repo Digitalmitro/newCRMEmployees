@@ -115,10 +115,8 @@ const Chat = () => {
           {user?.name?.charAt(0) || selectedUser?.[0]?.name?.charAt(0)}
         </p>
         <div>
-          <h2 className="text-sm font-semibold">
-            {user?.name || selectedUser?.[0]?.name}
-          </h2>
-          <p className="text-[10px] text-green-500 font-semibold">Active</p>
+          <h2 className="text-sm font-semibold">{user?.name}</h2>
+          <p className="text-[10px] text-green-500 font-semibold">{isOnline ? "🟢 Online" : "🔴 Offline"}</p>
         </div>
       </div>
 
