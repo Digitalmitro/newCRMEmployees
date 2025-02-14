@@ -74,6 +74,19 @@ export const sendMessage = (sender,receiver, message) => {
   }
 };
 
+// ✅ Join a channel
+export const joinChannel = (channelId) => {
+  socket.emit("joinChannel", channelId);
+};
+
+// ✅ Send a message in a channel
+export const sendChannelMessage = (channelId, sender, message) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+    let messageData = { channelId, sender, message };
+    socket.emit("send-channel-message", messageData);
+};
+
 // Function to send a real-time notification
 export const sendNotification = (userId, title, description) => {
   socket.emit("send-notification", { userId, title, description });
@@ -95,6 +108,13 @@ export const onNotificationReceived = (callback) => {
 
     // ✅ Show browser notification for alerts
     showNotification(notification.title, notification.description);
+  });
+};
+
+// ✅ Listen for incoming messages in a channel
+export const onChannelMessageReceived = (callback) => {
+  socket.on("new-channel-message", (message) => {
+    callback(message);
   });
 };
 
