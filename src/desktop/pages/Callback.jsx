@@ -11,7 +11,7 @@ function Callback() {
     country:"",
     address:"",
     comments:"",
-    user_id:"67a5d6d40ad94b67cea603bf",
+    user_id:"",
   })
 
   const handleChange=(e)=>{

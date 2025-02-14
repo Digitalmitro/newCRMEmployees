@@ -12,27 +12,25 @@ import logo from "../../../assets/desktop/logo.svg";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
 
-
 function Sidebarpart() {
   const {getChannels}=useAuth()
   const [employees, setEmployees] = useState([]);
   const [channels, setChannels] = useState([]);
   const { getAllUsers, userData } = useAuth();
+  const channel=async()=>{
+    const data=await getChannels()
+    setChannels(data)
+  }
+  const allUsers = async () => {
+    const users = await getAllUsers();
+
+    setEmployees(users);
+  };
 
   useEffect(() => {
-    const allUsers = async () => {
-      const users = await getAllUsers();
-
-      setEmployees(users);
-    };
-
-    const channel=async()=>{
-      const data=await getChannels()
-      setChannels(data)
-    }
     channel()
     allUsers();
-  }, [channels]);
+  }, []);
 
   const handleCowrokers=()=>{
     navigate("/addCoworker")

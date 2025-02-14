@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
     const [userData, setUserData] = useState([]);
     const [token, setToken] = useState(initialToken);
  
-
     useEffect(() => {
         if (token) {
             try {
@@ -20,12 +19,8 @@ export const AuthProvider = ({ children }) => {
             }
         } else {
             setUserData(null);
-        }
-
-       
+        }      
     }, []);
-
-  
 
     const getAllUsers=async()=>{
         try {
@@ -45,10 +40,7 @@ export const AuthProvider = ({ children }) => {
             console.error("Error fetching data:", error.message);
             return null;
         }
-    }
-    
-    
-
+    } 
 
     const fetchAttendance = async (range) => {
         try {
@@ -78,10 +70,8 @@ export const AuthProvider = ({ children }) => {
         if(response.ok){
           const data=await response.json();
           return data
-         
         }
       }
-
 
     return (
         <AuthContext.Provider value={{ token, setToken,userData, getChannels, fetchAttendance,getAllUsers }}>

@@ -5,40 +5,38 @@ import { useAuth } from "../../context/authContext";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function AddChannelPeople() {
-  const { getAllUsers,getChannels } = useAuth();
-  const [members,setMembers]=useState([])
+  const { getAllUsers } = useAuth();
+  const [members, setMembers] = useState([])
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPeople, setSelectedPeople] = useState([]);
   const [filteredPeople, setFilteredPeople] = useState([]);
   const [allPeople, setAllPeople] = useState([]); // Stores API response
   const [showDropdown, setShowDropdown] = useState(false);
-  const location=useLocation();
-  const channelName=location?.state.channelName?.channel;
-  const token=localStorage.getItem("token");
-  const navigate=useNavigate()
+  const location = useLocation();
+  const channelName = location?.state.channelName?.channel;
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate()
 
-  const handleButton=async()=>{
-      try {
-        const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/api/create`,{
-          method:"POST",
-          headers:{
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body:JSON.stringify({name:channelName,members:members})
-        });
-        if (response.ok) {
-          const data=await response.json();
-          console.log(data)
-        }
-      } catch (error) {
-        console.log(error)
+
+  const handleButton = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/api/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: channelName, members: members })
+      });
+      if (response.ok) {
+
       }
-      navigate("/")    
+    } catch (error) {
+      console.log(error)
+    }
+    navigate("/", { replace: true });
+    window.location.reload();
   }
-
-  
-  
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -86,13 +84,13 @@ function AddChannelPeople() {
     setSearchTerm("");
     setShowDropdown(false);
   };
-  
+
 
   const removePerson = (person) => {
     setSelectedPeople(selectedPeople.filter((p) => p.id !== person.id));
     setMembers((prevMembers) => prevMembers.filter((memberId) => memberId !== person.id));
   };
-  
+
 
   return (
     <div className="relative w-full border-b-2 border-orange-400 p-4 space-y-2">
@@ -118,7 +116,7 @@ function AddChannelPeople() {
             <div
               key={person._id}
               className="p-2 cursor-pointer hover:bg-gray-100"
-              onClick={() => handleSelectPerson(person._id,person.name)}
+              onClick={() => handleSelectPerson(person._id, person.name)}
             >
               {person.name}
             </div>
@@ -129,7 +127,7 @@ function AddChannelPeople() {
       {/* Selected People */}
       {selectedPeople.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {selectedPeople.map((person,i) => (
+          {selectedPeople.map((person, i) => (
             <div
               key={i}
               className="bg-orange-200 text-orange-800 px-2 py-1 rounded flex items-center"
