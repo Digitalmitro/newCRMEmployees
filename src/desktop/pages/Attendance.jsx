@@ -109,7 +109,7 @@ function Attendance() {
         </p>
         <div className="space-x-5">
           {loading && (
-            <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
+            <div className="absolute inset-0  bg-opacity-20 flex items-center justify-center z-50">
               <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
