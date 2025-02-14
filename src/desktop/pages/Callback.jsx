@@ -11,7 +11,6 @@ function Callback() {
     country:"",
     address:"",
     comments:"",
-    user_id:"67a5d6d40ad94b67cea603bf",
   })
 
   const handleChange=(e)=>{
@@ -28,10 +27,11 @@ function Callback() {
     e.preventDefault();
    
     try {
-      const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/callback`,{
+      const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/`,{
         method:"POST",
         headers:{
           "Content-Type": "application/json",
+          "Authorization":`Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify(callback)
       })

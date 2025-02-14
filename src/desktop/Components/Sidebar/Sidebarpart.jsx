@@ -161,7 +161,7 @@ function Sidebarpart() {
             Messages <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            {employees.map((user, i) => (
+            {employees.slice(0,4).map((user, i) => (
               <li
                 key={i}
                 className="block p-2 text-gray-700 text-[12px] cursor-pointer"

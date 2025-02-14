@@ -17,6 +17,8 @@ const Chat = () => {
   const location = useLocation();
   const user = location.state;
   const receiverId = user?.id;
+  const selectedUser = location?.state?.selectedUsers;
+  console.log(selectedUser);
   const { userData } = useAuth();
   const senderId = userData?.userId;
 
@@ -29,7 +31,11 @@ const Chat = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/message/messages/${senderId}/${receiverId}`);
+        const res = await axios.get(
+          `${
+            import.meta.env.VITE_BACKEND_API
+          }/message/messages/${senderId}/${receiverId}`
+        );
         setMessages(res.data?.messages);
         // console.log(res.data?.messages)
       } catch (error) {
@@ -75,9 +81,12 @@ const Chat = () => {
     };
 
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/message/send-message`, newMessage);
-      sendMessage(senderId, receiverId, input); 
-      setInput(""); 
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/message/send-message`,
+        newMessage
+      );
+      sendMessage(senderId, receiverId, input);
+      setInput("");
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -88,17 +97,20 @@ const Chat = () => {
     setInput((prev) => prev + emojiData.emoji);
 
     setTimeout(() => {
-      document.getElementById("chatInput").focus(); 
+      document.getElementById("chatInput").focus();
     }, 0);
   };
 
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
-
       <div className="flex gap-4 mb-6 border-b pt-2 px-8 pb-2">
-        <p className=" rounded-full border items-center  flex justify-center w-10 h-10 text-xl  text-white bg-orange-500">{user?.name?.charAt(0)}</p>
+        <p className=" rounded-full border items-center  flex justify-center w-10 h-10 text-xl  text-white bg-orange-500">
+          {user?.name?.charAt(0) || selectedUser?.[0]?.name?.charAt(0)}
+        </p>
         <div>
-          <h2 className="text-sm font-semibold">{user?.name}</h2>
+          <h2 className="text-sm font-semibold">
+            {user?.name || selectedUser?.[0]?.name}
+          </h2>
           <p className="text-[10px] text-green-500 font-semibold">Active</p>
         </div>
       </div>
@@ -117,8 +129,8 @@ const Chat = () => {
             style={{
               width: `${
                 msg.message.length <= 5
-                  ? 90 
-                  : Math.min((msg.message?.length ?? 0) * 15, 300) 
+                  ? 90
+                  : Math.min((msg.message?.length ?? 0) * 15, 300)
               }px`,
             }}
           >
@@ -128,18 +140,15 @@ const Chat = () => {
             </span>
           </div>
         ))}
-        <div ref={messagesEndRef} /> 
+        <div ref={messagesEndRef} />
       </div>
 
-   
       <div className="p-4 bg-white flex items-center border-t fixed bottom-0 w-[65%] space-x-2">
-  
         <div className="relative">
           <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
             <BsEmojiSmile size={22} className="cursor-pointer text-gray-500" />
           </button>
 
-     
           {showEmojiPicker && (
             <div className="absolute bottom-10 left-0 z-50">
               <EmojiPicker onEmojiClick={handleEmojiClick} />
@@ -147,7 +156,6 @@ const Chat = () => {
           )}
         </div>
 
-   
         <input
           id="chatInput"
           type="text"
@@ -157,7 +165,6 @@ const Chat = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
         />
-
 
         <button
           onClick={handleSendMessage}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import searchIcon from "../../assets/desktop/search.svg";
 import { IoIosClose } from "react-icons/io";
 import { useAuth } from "../../context/authContext";
+import { useNavigate } from "react-router-dom";
 
 function AddCoworkers() {
   const [users, setUsers] = useState([]);
@@ -10,26 +11,47 @@ function AddCoworkers() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { getAllUsers } = useAuth();
+  const navigate=useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
       const userList = await getAllUsers();
       setUsers(userList);
-      setFilteredUsers(userList);
       setFilteredUsers(userList); // Show all users by default
     };
     fetchUsers();
   }, []);
 
+  const handleCreate=()=>{
+    navigate("/chat",{
+      state:{
+        selectedUsers
+      }
+    })
+  }
+
   const handleInputChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    setFilteredUsers(
-      users.filter((user) =>
-        user.name.toLowerCase().includes(value.toLowerCase())
-      )
-    );
-    setShowDropdown(value.length > 0);
+
+    // Show all users if input is empty, otherwise filter
+    if (value.trim() === "") {
+      setFilteredUsers(users);
+    } else {
+      setFilteredUsers(
+        users.filter((user) =>
+          user.name.toLowerCase().includes(value.toLowerCase())
+        )
+      );
+    }
+
+    setShowDropdown(true);
+  };
+
+  // Show all users when input is focused
+  const handleInputFocus = () => {
+    setFilteredUsers(users);
+    setShowDropdown(true);
   };
 
   const handleSelectUser = (user) => {
@@ -56,6 +78,7 @@ function AddCoworkers() {
           placeholder="Search for coworkers"
           value={searchTerm}
           onChange={handleInputChange}
+          onFocus={handleInputFocus}
           className="outline-none w-full text-[12px] p-1"
         />
       </div>
@@ -97,8 +120,8 @@ function AddCoworkers() {
 
       {/* Create Button */}
       <div className="flex justify-end">
-        <button className="text-[12px] text-orange-400 border border-orange-400 rounded px-3 cursor-pointer">
-          Create
+        <button className="text-[12px] text-orange-400 border border-orange-400 rounded px-3 cursor-pointer" onClick={handleCreate}>
+          Create Chat
         </button>
       </div>
     </div>
