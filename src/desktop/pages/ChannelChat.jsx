@@ -7,24 +7,35 @@ import { BsEmojiSmile } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { IoMdShareAlt } from "react-icons/io";
 import { useAuth } from "../../context/authContext";
-import { onChannelMessageReceived, sendChannelMessage,joinChannel } from "../../utils/socket"; // Socket functions
-import axios from "axios"; 
+import {
+  onChannelMessageReceived,
+  sendChannelMessage,
+  joinChannel,
+} from "../../utils/socket"; // Socket functions
+import axios from "axios";
 
 const ChannelChat = () => {
-  const {userData}=useAuth()
+  const { userData } = useAuth();
   const location = useLocation();
   const groupUsers = location.state;
   const senderId = userData?.userId;
   const [messages, setMessages] = useState([]);
-  const [channelInfo, setChannelsInfo] = useState()
+  const [channelInfo, setChannelsInfo] = useState();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
- 
+  const [modal, setModal] = useState(false);
+
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
+  const handleShare = () => {
+    setModal(true);
+  };
+
   const fetchChannelsInfo = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/api/${groupUsers.id}`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/api/${groupUsers.id}`
+      );
       setChannelsInfo(res.data);
     } catch (error) {
       console.error("❌ Error fetching channel:", error);
@@ -35,7 +46,9 @@ const ChannelChat = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_API}/channels/${groupUsers.id}`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_API}/channels/${groupUsers.id}`
+        );
         setMessages(res.data.messages);
       } catch (error) {
         console.error("❌ Error fetching channel messages:", error);
@@ -43,8 +56,8 @@ const ChannelChat = () => {
     };
 
     fetchMessages();
-    joinChannel(groupUsers.id)
-    fetchChannelsInfo()
+    joinChannel(groupUsers.id);
+    fetchChannelsInfo();
   }, [groupUsers.id]);
 
   // ✅ Listen for new messages via Socket.io
@@ -64,14 +77,21 @@ const ChannelChat = () => {
 
     const newMessage = {
       sender: senderId, // Replace with actual user ID
-      channelId:groupUsers.id,
+      channelId: groupUsers.id,
       message: input,
       createdAt: new Date(),
     };
 
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
-      sendChannelMessage(newMessage.channelId,newMessage.sender,newMessage.message);
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/channels/send`,
+        newMessage
+      );
+      sendChannelMessage(
+        newMessage.channelId,
+        newMessage.sender,
+        newMessage.message
+      );
       setMessages([...messages, newMessage]); // Optimistic UI update
       setInput("");
     } catch (error) {
@@ -80,7 +100,10 @@ const ChannelChat = () => {
   };
 
   const getSenderName = (senderId) => {
-    return channelInfo?.members?.find((member) => member._id === senderId)?.name || "Unknown";
+    return (
+      channelInfo?.members?.find((member) => member._id === senderId)?.name ||
+      "Unknown"
+    );
   };
 
   const handleEmojiClick = (emojiData) => {
@@ -103,20 +126,49 @@ const ChannelChat = () => {
           </div>
           <div>
             <h2 className="text-sm font-semibold">
-            
               {groupUsers.name.charAt(0).toUpperCase() +
                 groupUsers.name.slice(1)}
-          
             </h2>
             <p className="text-[10px] text-green-500 font-semibold">Active</p>
           </div>
-           <div className="flex items-center space-x-2">
-               <IoPeopleSharp />
-               <p className="text[10px]">({channelInfo?.members.length})</p>
-           </div>
+          <div className="flex items-center space-x-2">
+            <IoPeopleSharp />
+            <p className="text[10px]">({channelInfo?.members.length})</p>
+          </div>
         </div>
-        <div className="flex">
-          <IoMdShareAlt />
+        <div className="relative flex">
+          <IoMdShareAlt onClick={handleShare} className="cursor-pointer" />
+
+          {modal && (
+            <div className="absolute top-12 right-0 mt-2 space-y-4 bg-white px-2 pb-4 rounded shadow-lg  w-64">
+              <button
+                className="absolute top-1 right-0 text-xl px-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModal(false);
+                }}
+              >
+                &times;
+              </button>
+              <input
+                type="text"
+                className="w-full p-1 mt-8  border border-gray-400 rounded outline-none text-[15px]"
+              />
+              <div className="flex justify-between">
+                <p className="p-1 bg-gray-200 rounded text-[12px]">
+                  uhrughrughruhgrughrughhuhyg
+                </p>
+                <button className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded">
+                  copy
+                </button>
+              </div>
+              <div className="flex justify-center items-center">
+                <button className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded">
+                  Send
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
