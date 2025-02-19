@@ -23,13 +23,13 @@ const ChannelChat = () => {
   const [channelInfo, setChannelsInfo] = useState();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [modal, setModal] = useState(false);
-
   const [input, setInput] = useState("");
+  const [inputSend, setInputSend] = useState("");
   const messagesEndRef = useRef(null);
-
   const handleShare = () => {
     setModal(true);
   };
+  console.log(channelInfo);
 
   const fetchChannelsInfo = async () => {
     try {
@@ -99,6 +99,30 @@ const ChannelChat = () => {
     }
   };
 
+  const handleSend = async () => {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_API}/api/invite`,
+      {
+        method: "POST",
+        headers:{
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          channelId: channelInfo?._id,
+          email: inputSend,
+          invitedBy: userData?.userId,
+        }),
+      }
+    );
+    if (response.ok) {
+      alert("Invite sent successfully");
+    }
+  };
+
+  const handleText = (value) => {
+    setInputSend(value)
+  };
+
   const getSenderName = (senderId) => {
     return (
       channelInfo?.members?.find((member) => member._id === senderId)?.name ||
@@ -151,19 +175,32 @@ const ChannelChat = () => {
                 &times;
               </button>
               <input
-                type="text"
+                name="email"
+                type="email"
+                id="email"
+                value={inputSend}
+                onChange={(e) => handleText(e.target.value)}
                 className="w-full p-1 mt-8  border border-gray-400 rounded outline-none text-[15px]"
               />
               <div className="flex justify-between">
                 <p className="p-1 bg-gray-200 rounded text-[12px]">
-                  uhrughrughruhgrughrughhuhyg
+                  {channelInfo.inviteLink}
                 </p>
-                <button className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded">
+                <button
+                  className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded cursor-pointer"
+                  onClick={() => {
+                    navigator.clipboard.writeText(channelInfo.inviteLink);
+                    alert("Copied to clipboard!");
+                  }}
+                >
                   copy
                 </button>
               </div>
               <div className="flex justify-center items-center">
-                <button className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded">
+                <button
+                  className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded"
+                  onClick={handleSend}
+                >
                   Send
                 </button>
               </div>
