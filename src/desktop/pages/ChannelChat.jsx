@@ -150,8 +150,8 @@ const ChannelChat = () => {
           </div>
           <div>
             <h2 className="text-sm font-semibold">
-              {groupUsers.name.charAt(0).toUpperCase() +
-                groupUsers.name.slice(1)}
+              {groupUsers?.name?.charAt(0).toUpperCase() +
+                groupUsers?.name?.slice(1)}
             </h2>
             <p className="text-[10px] text-green-500 font-semibold">Active</p>
           </div>
