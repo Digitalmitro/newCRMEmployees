@@ -7,6 +7,7 @@ import {
   sendMessage,
   onMessageReceived,
   connectSocket,
+  onUserStatusUpdate
 } from "../../utils/socket";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
@@ -21,7 +22,7 @@ const Chat = () => {
   console.log(selectedUser);
   const { userData } = useAuth();
   const senderId = userData?.userId;
-
+  const [isOnline, setIsOnline] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -56,6 +57,12 @@ const Chat = () => {
         (newMessage.sender === receiverId && newMessage.receiver === senderId)
       ) {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
+      }
+    });
+    
+    onUserStatusUpdate(({ userId, status }) => {
+      if (userId === receiverId) {
+        setIsOnline(status === "online");
       }
     });
 
@@ -108,10 +115,8 @@ const Chat = () => {
           {user?.name?.charAt(0) || selectedUser?.[0]?.name?.charAt(0)}
         </p>
         <div>
-          <h2 className="text-sm font-semibold">
-            {user?.name || selectedUser?.[0]?.name}
-          </h2>
-          <p className="text-[10px] text-green-500 font-semibold">Active</p>
+          <h2 className="text-sm font-semibold">{user?.name}</h2>
+          <p className="text-[10px] text-green-500 font-semibold">{isOnline ? "🟢 Online" : "🔴 Offline"}</p>
         </div>
       </div>
 
