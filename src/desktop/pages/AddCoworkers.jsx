@@ -25,7 +25,7 @@ function AddCoworkers() {
   const handleCreate=()=>{
     navigate("/chat",{
       state:{
-        selectedUsers
+        name:selectedUsers[0].name,id: selectedUsers[0]._id
       }
     })
   }
@@ -85,7 +85,7 @@ function AddCoworkers() {
 
       {/* Dropdown for Suggestions */}
       {showDropdown && filteredUsers.length > 0 && (
-        <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded shadow-md mt-1 z-10">
+        <div className="max-h-[415px] absolute overflow-y-auto top-full left-0 w-full bg-white border border-gray-300 rounded shadow-md mt-1 z-10">
           {filteredUsers.map((user) => (
             <div
               key={user._id}

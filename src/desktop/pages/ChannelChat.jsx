@@ -1,24 +1,24 @@
 import { useState, useRef, useEffect } from "react";
 import { IoPeopleSharp } from "react-icons/io5";
-import { Send } from "lucide-react";
+import { Send,Paperclip } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
 import { BsEmojiSmile } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { IoMdShareAlt } from "react-icons/io";
 import { useAuth } from "../../context/authContext";
-import { onChannelMessageReceived, sendChannelMessage,joinChannel } from "../../utils/socket"; // Socket functions
-import axios from "axios"; 
+import { onChannelMessageReceived, sendChannelMessage, joinChannel } from "../../utils/socket"; // Socket functions
+import axios from "axios";
 
 const ChannelChat = () => {
-  const {userData}=useAuth()
+  const { userData } = useAuth()
   const location = useLocation();
   const groupUsers = location.state;
   const senderId = userData?.userId;
   const [messages, setMessages] = useState([]);
   const [channelInfo, setChannelsInfo] = useState()
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
- 
+  const [file, setFile] = useState(null);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
@@ -64,14 +64,14 @@ const ChannelChat = () => {
 
     const newMessage = {
       sender: senderId, // Replace with actual user ID
-      channelId:groupUsers.id,
+      channelId: groupUsers.id,
       message: input,
       createdAt: new Date(),
     };
 
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
-      sendChannelMessage(newMessage.channelId,newMessage.sender,newMessage.message);
+      sendChannelMessage(newMessage.channelId, newMessage.sender, newMessage.message);
       setMessages([...messages, newMessage]); // Optimistic UI update
       setInput("");
     } catch (error) {
@@ -103,17 +103,17 @@ const ChannelChat = () => {
           </div>
           <div>
             <h2 className="text-sm font-semibold">
-            
+
               {groupUsers.name.charAt(0).toUpperCase() +
                 groupUsers.name.slice(1)}
-          
+
             </h2>
             <p className="text-[10px] text-green-500 font-semibold">Active</p>
           </div>
-           <div className="flex items-center space-x-2">
-               <IoPeopleSharp />
-               <p className="text[10px]">({channelInfo?.members.length})</p>
-           </div>
+          <div className="flex items-center space-x-2">
+            <IoPeopleSharp />
+            <p className="text[10px]">({channelInfo?.members.length})</p>
+          </div>
         </div>
         <div className="flex">
           <IoMdShareAlt />
@@ -126,17 +126,15 @@ const ChannelChat = () => {
           <div key={msg.id}>
             <div
               className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
-            ${
-              msg.sender === senderId
-                ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
-                : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
-            }`}
+            ${msg.sender === senderId
+                  ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
+                  : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
+                }`}
               style={{
-                width: `${
-                  msg.message.length <= 5
+                width: `${msg.message.length <= 5
                     ? 90
                     : Math.min((msg.message?.length ?? 0) * 15, 300)
-                }px`,
+                  }px`,
               }}
             >
               <div className="flex gap-2 mb-2">
@@ -168,6 +166,16 @@ const ChannelChat = () => {
             </div>
           )}
         </div>
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="hidden"
+          id="fileInput"
+        />
+        <label htmlFor="fileInput" className="cursor-pointer">
+          <Paperclip size={22} className="text-gray-500" />
+        </label>
+
         <input
           type="text"
           className="flex-1 p-2 border rounded-lg outline-none text-[15px] w-full"

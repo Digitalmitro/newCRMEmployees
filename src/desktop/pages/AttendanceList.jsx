@@ -53,10 +53,10 @@ function AttendanceList() {
           Half Day:{halfCount}
         </button>
       </div>
-      <div className="overflow-x-auto p-4 mt-4">
-        <table className="min-w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-[#D9D9D9] ">
+      <div className="overflow-y-auto max-h-[370px] border border-gray-300 rounded-md mt-3">
+        <table className="min-w-full border-collapse border border-gray-300 ">
+          <thead className="bg-[#D9D9D9] sticky top-0 z-10">
+            <tr>
               <th className="border border-gray-400 px-4 py-2 text-[15px] font-medium pt-4 pb-4">
                 Date
               </th>
