@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { IoPeopleSharp } from "react-icons/io5";
-import { Send } from "lucide-react";
+import { Send,Paperclip } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -22,7 +22,7 @@ const ChannelChat = () => {
   const [messages, setMessages] = useState([]);
   const [channelInfo, setChannelsInfo] = useState();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [modal, setModal] = useState(false);
+  const [file, setFile] = useState(null); const [modal, setModal] = useState(false);
   const [input, setInput] = useState("");
   const [inputSend, setInputSend] = useState("");
   const messagesEndRef = useRef(null);
@@ -83,15 +83,8 @@ const ChannelChat = () => {
     };
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/channels/send`,
-        newMessage
-      );
-      sendChannelMessage(
-        newMessage.channelId,
-        newMessage.sender,
-        newMessage.message
-      );
+      await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
+      sendChannelMessage(newMessage.channelId, newMessage.sender, newMessage.message);
       setMessages([...messages, newMessage]); // Optimistic UI update
       setInput("");
     } catch (error) {
@@ -215,17 +208,15 @@ const ChannelChat = () => {
           <div key={msg.id}>
             <div
               className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
-            ${
-              msg.sender === senderId
-                ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
-                : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
-            }`}
+            ${msg.sender === senderId
+                  ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
+                  : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
+                }`}
               style={{
-                width: `${
-                  msg.message.length <= 5
+                width: `${msg.message.length <= 5
                     ? 90
                     : Math.min((msg.message?.length ?? 0) * 15, 300)
-                }px`,
+                  }px`,
               }}
             >
               <div className="flex gap-2 mb-2">
@@ -257,6 +248,16 @@ const ChannelChat = () => {
             </div>
           )}
         </div>
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="hidden"
+          id="fileInput"
+        />
+        <label htmlFor="fileInput" className="cursor-pointer">
+          <Paperclip size={22} className="text-gray-500" />
+        </label>
+
         <input
           type="text"
           className="flex-1 p-2 border rounded-lg outline-none text-[15px] w-full"

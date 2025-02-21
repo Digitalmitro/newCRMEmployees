@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import profile from "../../assets/desktop/profileIcon.svg";
-import { Send } from "lucide-react";
+import { Send,Paperclip } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   sendMessage,
@@ -19,7 +19,7 @@ const Chat = () => {
   const user = location.state;
   const receiverId = user?.id;
   const selectedUser = location?.state?.selectedUsers;
-  console.log(selectedUser);
+  // console.log(selectedUser);
   const { userData } = useAuth();
   const senderId = userData?.userId;
   const [isOnline, setIsOnline] = useState(false);
@@ -27,7 +27,7 @@ const Chat = () => {
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null); // Auto-scroll reference
-
+  const [file, setFile] = useState(null);
   // ✅ Load chat history
   useEffect(() => {
     const fetchMessages = async () => {
@@ -160,6 +160,15 @@ const Chat = () => {
             </div>
           )}
         </div>
+        <input
+          type="file"
+          onChange={(e) => setFile(e.target.files[0])}
+          className="hidden"
+          id="fileInput"
+        />
+        <label htmlFor="fileInput" className="cursor-pointer">
+          <Paperclip size={22} className="text-gray-500" />
+        </label>
 
         <input
           id="chatInput"

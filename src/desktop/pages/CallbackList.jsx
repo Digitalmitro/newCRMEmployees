@@ -16,7 +16,17 @@ function CallbackList() {
 
   const fetchData = async (page) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/all?page=${page}&limit=${limit}`);
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API}/callback/user?page=${page}&limit=${limit}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Pass token in Authorization header
+          },
+        }
+      );
       const result = await response.json();
       setData(result.data || []);
       setTotalPages(result.totalPages || 1);
