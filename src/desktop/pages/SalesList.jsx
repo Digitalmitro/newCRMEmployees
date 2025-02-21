@@ -36,7 +36,6 @@ function SalesList() {
   }, [currentPage]); 
 
   
-
   const handleNavigate = () => {
     navigate("/sales");
   };
