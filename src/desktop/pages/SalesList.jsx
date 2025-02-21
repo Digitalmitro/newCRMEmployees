@@ -10,9 +10,17 @@ function SalesList() {
   const limit = 5;
   useEffect(() => {
     const fetchSalesList = async () => {
+      const token = localStorage.getItem("token");
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_API}/sale/all?page=${currentPage}&limit=${limit}`
+          `${import.meta.env.VITE_BACKEND_API}/sale/user?page=${currentPage}&limit=${limit}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // Pass token in Authorization header
+            },
+          }
         );
         if (response.ok) {
           const data = await response.json();
