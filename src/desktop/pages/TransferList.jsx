@@ -33,6 +33,27 @@ import { MdDelete } from "react-icons/md";
         console.error("Error fetching data:", error);
       }
     };
+
+    const deleteCallBack = async (id) => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/transfer/${id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          console.log("Deleted successfully");
+          setData((prevSales) => prevSales.filter((item) => item._id !== id));
+        } else {
+          console.error("Failed to delete");
+        }
+      } catch (error) {
+        console.error("Error deleting sale:", error);
+      }
+    };
+    
+    const handleDelete=(id)=>{
+      if(!id) return
+      deleteCallBack(id)
+    }
   
     const handleNavigate=()=>{
         navigate("/transfer")
@@ -94,7 +115,7 @@ import { MdDelete } from "react-icons/md";
                 <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer">
                   <FaEye />
                   </button>
-                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer">
+                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => {handleDelete(item?._id)}}>
                     <MdDelete/>
                   </button>
                 </td>

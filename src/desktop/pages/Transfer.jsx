@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Transfer() {
+  const navigate=useNavigate()
   const [transfer,setTransfer]=useState(
     {
       name:"",
@@ -48,6 +50,7 @@ function Transfer() {
         address: "",
         comments: "",
       });
+      navigate("/transferlist")
     } catch (error) {
       console.log(error)
     }

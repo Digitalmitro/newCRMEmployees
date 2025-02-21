@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Callback() {
+const navigate=useNavigate()
+
   const [callback,setCallback]=useState({
     name:"",
     email:"",
@@ -46,6 +49,7 @@ function Callback() {
         address: "",
         comments: "",
       });
+      navigate("/callbacklist")
     } catch (error) {
       console.log(error)
     }

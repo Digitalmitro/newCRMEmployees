@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 function Sales() {
+  const navigate=useNavigate()
   const [sales,setSales]=useState( {
     name:"",
     email:"",
@@ -46,6 +48,7 @@ function Sales() {
         address: "",
         comments: "",
       });
+      navigate("/saleslist")
     } catch (error) {
       console.log(error)
     }
@@ -54,7 +57,7 @@ function Sales() {
     <div className="p-4">
       <div className="flex justify-between px-4 border-b-2 border-gray-300 p-4">
         <div>
-          <p className="text-[18px] font-medium">Call Back</p>
+          <p className="text-[18px] font-medium">Sales</p>
         </div>
         <div className=" ">
           <button className=" mx-2 border border-orange-500 text-[12px] py-0.5 text-orange-500 px-6 rounded cursor-pointer">
