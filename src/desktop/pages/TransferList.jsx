@@ -1,6 +1,8 @@
   import { useNavigate } from "react-router-dom";
   import { useState, useEffect } from "react";
   import moment from "moment";
+  import { FaEye } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
   function TransferList() {
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -31,6 +33,27 @@
         console.error("Error fetching data:", error);
       }
     };
+
+    const deleteCallBack = async (id) => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/transfer/${id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          console.log("Deleted successfully");
+          setData((prevSales) => prevSales.filter((item) => item._id !== id));
+        } else {
+          console.error("Failed to delete");
+        }
+      } catch (error) {
+        console.error("Error deleting sale:", error);
+      }
+    };
+    
+    const handleDelete=(id)=>{
+      if(!id) return
+      deleteCallBack(id)
+    }
   
     const handleNavigate=()=>{
         navigate("/transfer")
@@ -88,9 +111,12 @@
                 {/* <td className="border px-3 py-2">{item.comments}</td>
                 <td className="border px-3 py-2">{item.budget}</td>
                 <td className="border px-3 py-2">{item.sentTo}</td> */}
-                <td className="border px-3 py-2">
-                  <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-                    View
+                <td className="border px-3 space-x-2 py-2">
+                <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer">
+                  <FaEye />
+                  </button>
+                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => {handleDelete(item?._id)}}>
+                    <MdDelete/>
                   </button>
                 </td>
               </tr>

@@ -13,14 +13,14 @@ import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
 
 function Sidebarpart() {
-  const {getChannels}=useAuth()
+  const { getChannels } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [channels, setChannels] = useState([]);
   const { getAllUsers, userData } = useAuth();
-  const channel=async()=>{
-    const data=await getChannels()
-    setChannels(data)
-  }
+  const channel = async () => {
+    const data = await getChannels();
+    setChannels(data);
+  };
   const allUsers = async () => {
     const users = await getAllUsers();
 
@@ -28,19 +28,20 @@ function Sidebarpart() {
   };
 
   useEffect(() => {
-    channel()
+    channel();
     allUsers();
   }, []);
 
-  const handleCowrokers=()=>{
-    navigate("/addCoworker")
-  }
+  const handleCowrokers = () => {
+    navigate("/addCoworker");
+  };
 
   const navigate = useNavigate();
-  const handleChat = (name,id) => {
+  const handleChat = (name, id) => {
     navigate("/chat", {
       state: {
-        name,id
+        name,
+        id,
       },
     });
     // console.log(name,id)
@@ -48,15 +49,14 @@ function Sidebarpart() {
   const handleChannel = () => {
     navigate("/create-channel");
   };
-  const handleChannelChat=(name,id)=>{
-    navigate("/channelchat",{
+  const handleChannelChat = (name, id) => {
+    navigate("/channelchat", {
       state: {
-        name,id
+        name,
+        id,
       },
     });
-  }
-
-  
+  };
 
   return (
     <div className="  flex ">
@@ -111,16 +111,16 @@ function Sidebarpart() {
             </div>
           </Link>
           <div className="flex flex-col items-center">
-          <p
-          className=" rounded border items-center  flex justify-center w-10  text-2xl font-medium text-white bg-orange-600"
-        >{userData?.name?.charAt(0)}</p>
+            <p className=" rounded border items-center  flex justify-center w-10  text-2xl font-medium text-white bg-orange-600">
+              {userData?.name?.charAt(0)}
+            </p>
           </div>
         </nav>
       </div>
 
-      <div className="bg-gray-200 w-[300px] p-4 border border-orange-400">
-        <div className="flex justify-between pt-4 mb-4">
-          <h2 className="text-[15px] font-medium   flex gap-2">
+      <div className="bg-gray-200 w-[250px] p-4 border border-orange-400">
+        <div className="flex justify-between items-center pt-4 mb-4">
+          <h2 className="text-[18px] font-medium   flex gap-2">
             {userData?.name}
             <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h2>
@@ -129,22 +129,34 @@ function Sidebarpart() {
 
         {/* Channels Section */}
         <div className="mb-4 pt-8">
-          <h3 className="text-[12px] font-semibold text-gray-600 flex gap-2">
+          <h3 className="text-[15px] font-bold text-gray-600 flex gap-2">
             Channels <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            {channels.map((channel)=>(
+            {channels.map((channel) => (
               <li key={channel._id}>
-              <p className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={()=>handleChannelChat(channel.name,channel._id)}>
-                {channel.name}
-              </p>
-            </li>
-            ))
-              
-            }
+                <p
+                  className="block p-2 text-gray-700 font-medium text-[14px] cursor-pointer"
+                  onClick={() => handleChannelChat(channel.name, channel._id)}
+                >
+                  <p className="flex space-x-2">
+                  <span
+                    className="border items-center  flex justify-center w-5 h-5 text-[12px] font-medium text-white"
+                    style={{
+                      backgroundColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 40%)`,
+                    }}
+                  >
+                    {channel?.name?.charAt(0).toUpperCase()}
+                  </span>
+                  <span>{channel.name}</span>
+                </p>
+                  
+                </p>
+              </li>
+            ))}
             <li>
               <p
-                className="block p-2 text-gray-700 text-[10px] cursor-pointer"
+                className="block p-2 text-gray-700 text-[13px] cursor-pointer"
                 onClick={handleChannel}
               >
                 + Add Channels
@@ -155,20 +167,34 @@ function Sidebarpart() {
 
         {/* Messages Section */}
         <div className="mb-4">
-          <h3 className="text-[12px] font-semibold text-gray-600 flex gap-2">
+          <h3 className="text-[15px] font-bold text-gray-600 flex gap-2">
             Messages <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            {employees?.slice(0,4).map((user, i) => (
+            {employees?.slice(0, 4).map((user, i) => (
               <li
                 key={i}
-                className="block p-2 text-gray-700 text-[12px] cursor-pointer"
+                className="block p-2 text-gray-700 text-[14px] font-medium cursor-pointer"
                 onClick={() => handleChat(user.name, user._id)}
               >
-                {user.name}
+                <p className="flex space-x-2">
+                  <span
+                    className="border items-center  flex justify-center w-5 h-5 text-[12px] font-medium text-white"
+                    style={{
+                      backgroundColor: `hsl(${Math.floor(Math.random() * 360)}, 70%, 40%)`,
+                    }}
+                  >
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </span>
+                  <span>{user.name}</span>
+                  <span>{`(1)`}</span>
+                </p>
               </li>
             ))}
-            <li className="block p-2 text-gray-700 text-[12px] cursor-pointer" onClick={handleCowrokers}>
+            <li
+              className="block p-2 text-gray-700 text-[15px] cursor-pointer"
+              onClick={handleCowrokers}
+            >
               + Add Coworker
             </li>
           </ul>
