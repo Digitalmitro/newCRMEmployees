@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { FaEye } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 import moment from "moment";
 function CallbackList() {
   const [data, setData] = useState([]);
@@ -87,9 +89,12 @@ function CallbackList() {
                 {/* <td className="border px-3 py-2">{item.comments}</td>
                 <td className="border px-3 py-2">{item.budget}</td>
                 <td className="border px-3 py-2">{item.sentTo}</td> */}
-                <td className="border px-3 py-2">
-                  <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-                    View
+                <td className="border px-3 space-x-2 py-2">
+                  <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer">
+                  <FaEye />
+                  </button>
+                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer">
+                    <MdDelete/>
                   </button>
                 </td>
               </tr>

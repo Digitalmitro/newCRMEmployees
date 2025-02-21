@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import moment from "moment";
-
+import { FaEye } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
 function SalesList() {
   const navigate = useNavigate();
   const [sales,setSales]=useState([])
@@ -18,6 +19,7 @@ function SalesList() {
           const data = await response.json();
           
           setSales(data?.data || []);
+          console.log(data?.data)
           setTotalPages(data.totalPages || 1);
         }
       } catch (error) {
@@ -25,7 +27,28 @@ function SalesList() {
       }
     };
     fetchSalesList();
-  }, [currentPage]); 
+  }, [currentPage]);
+
+  const deleteCallBack = async (id) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/sale/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        console.log("Deleted successfully");
+        setSales((prevSales) => prevSales.filter((item) => item._id !== id));
+      } else {
+        console.error("Failed to delete");
+      }
+    } catch (error) {
+      console.error("Error deleting sale:", error);
+    }
+  };
+  
+  const handleDelete=(id)=>{
+    if(!id) return
+    deleteCallBack(id)
+  }
 
   
 
@@ -99,10 +122,14 @@ function SalesList() {
                 <td className="border border-gray-300 px-4 py-2 text-center">
                   {item.domainName}
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-center">
-                  <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-                    View
+                <td className="border space-x-2  border-gray-300 px-4 py-2 text-center">
+                <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer">
+                  <FaEye />
                   </button>
+                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => {handleDelete(item?._id)}}>
+                    <MdDelete/>
+                  </button>
+                  
                 </td>
               </tr>
             ))}
