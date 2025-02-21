@@ -68,7 +68,7 @@ function DesktopRouting() {
                     <Route path="/channelchat" element={<ChannelChat/>}/>
                     <Route path="/callbackview" element={<CallbackView/>}/>
                     <Route path="/salesview" element={<SalesView/>}/>
-                    <Route path="/transferview" element={<SalesView/>}/>
+                    <Route path="/transferview" element={<TransferView/>}/>
 
                   </Routes>
                 </div>
