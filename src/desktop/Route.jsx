@@ -23,6 +23,7 @@ import NotificationPage from "./pages/Notification";
 import ForgotClock from "./pages/ForgotClock";
 import AddCoworkers from "./pages/AddCoworkers";
 import ChannelChat from "./pages/ChannelChat";
+import CallbackView from "./pages/CallBackView";
 
 
 function DesktopRouting() {
@@ -63,6 +64,7 @@ function DesktopRouting() {
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>
                     <Route path="/addCoworker" element={<CreateChannel/>}/>
                     <Route path="/channelchat" element={<ChannelChat/>}/>
+                    <Route path="/callbackview" element={<CallbackView/>}/>
 
                   </Routes>
                 </div>
