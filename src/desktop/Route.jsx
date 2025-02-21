@@ -24,6 +24,8 @@ import ForgotClock from "./pages/ForgotClock";
 import AddCoworkers from "./pages/AddCoworkers";
 import ChannelChat from "./pages/ChannelChat";
 import CallbackView from "./pages/CallBackView";
+import SalesView from "./pages/SalesView";
+import TransferView from "./pages/TransferView";
 
 
 function DesktopRouting() {
@@ -65,6 +67,8 @@ function DesktopRouting() {
                     <Route path="/addCoworker" element={<CreateChannel/>}/>
                     <Route path="/channelchat" element={<ChannelChat/>}/>
                     <Route path="/callbackview" element={<CallbackView/>}/>
+                    <Route path="/salesview" element={<SalesView/>}/>
+                    <Route path="/transferview" element={<SalesView/>}/>
 
                   </Routes>
                 </div>

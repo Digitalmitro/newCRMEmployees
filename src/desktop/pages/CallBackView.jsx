@@ -5,7 +5,7 @@ function CallbackView() {
 const navigate=useNavigate()
 const location=useLocation()
 const callbackdata=location?.state?.item;
-console.log(callbackdata)
+// console.log(callbackdata)
 
   const [callback,setCallback]=useState({
     name:callbackdata?.name,
@@ -13,7 +13,7 @@ console.log(callbackdata)
     phone:callbackdata?.phone,
     calldate:callbackdata?.calldate,
     domainName:callbackdata?.domainName,
-    budget:callbackdata?.buget,
+    buget:callbackdata?.buget,
     country:callbackdata?.country,
     address:callbackdata?.address,
     comments:callbackdata?.comments,
@@ -51,38 +51,38 @@ console.log(callbackdata)
     }
   };
   
-  const handleSubmit=async(e)=>{
-    e.preventDefault();
+  // const handleSubmit=async(e)=>{
+  //   e.preventDefault();
    
-    try {
-      const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/`,{
-        method:"POST",
-        headers:{
-          "Content-Type": "application/json",
-          "Authorization":`Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify(callback)
-      })
-      setCallback({
-        name: "",
-        email: "",
-        phone: "",
-        calldate: "",
-        domainName: "",
-        budget: "",
-        country: "",
-        address: "",
-        comments: "",
-      });
-      navigate("/callbacklist")
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  //   try {
+  //     const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/`,{
+  //       method:"POST",
+  //       headers:{
+  //         "Content-Type": "application/json",
+  //         "Authorization":`Bearer ${localStorage.getItem("token")}`
+  //       },
+  //       body: JSON.stringify(callback)
+  //     })
+  //     setCallback({
+  //       name: "",
+  //       email: "",
+  //       phone: "",
+  //       calldate: "",
+  //       domainName: "",
+  //       buget: "",
+  //       country: "",
+  //       address: "",
+  //       comments: "",
+  //     });
+  //     navigate("/callbacklist")
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 
-  useEffect(()=>{
-    handleSubmit()
-  })
+  // useEffect(()=>{
+  //   handleSubmit()
+  // })
   return (
     <div className="p-4">
       <div className="flex justify-between px-4 border-b-2 border-gray-300 p-4">
@@ -94,7 +94,7 @@ console.log(callbackdata)
 
 
       <div className="pt-10 px-2 ">
-        <form className="w-full" onSubmit={handleSubmit}>
+        <form className="w-full" >
           <div className="grid grid-cols-2 ">
             {/* <div className="space-x-8 mb-4">
               <label htmlFor="text" className="text-[14px] font-medium">
@@ -204,9 +204,9 @@ console.log(callbackdata)
               </label>
               <input
                 type="text"
-                name="budget"
-                id="budget"
-                value={callback.budget}
+                name="buget"
+                id="buget"
+                value={callback.buget}
                 onChange={handleChange}
                 className="border border-[#A6A6A6] outline-none px-2 rounded "
               />

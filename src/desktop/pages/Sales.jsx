@@ -9,7 +9,7 @@ function Sales() {
     phone:"",
     calldate:"",
     domainName:"",
-    budget:"",
+    buget:"",
     country:"",
     address:"",
     comments:"",
@@ -43,7 +43,7 @@ function Sales() {
         phone: "",
         calldate: "",
         domainName: "",
-        budget: "",
+        buget: "",
         country: "",
         address: "",
         comments: "",
@@ -183,7 +183,7 @@ function Sales() {
                 type="text"
                 name="budget"
                 id="budget"
-                value={sales.budget}
+                value={sales.buget}
                 onChange={handleChange}
                 className="border border-[#A6A6A6] outline-none px-2 rounded "
               />

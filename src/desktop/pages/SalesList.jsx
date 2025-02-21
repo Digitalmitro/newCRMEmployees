@@ -53,6 +53,11 @@ function SalesList() {
     }
   };
   
+  const handleView=(item)=>{
+    navigate("/salesview",{state:{
+      item
+    }})
+  }
   const handleDelete=(id)=>{
     if(!id) return
     deleteCallBack(id)
@@ -130,7 +135,7 @@ function SalesList() {
                   {item.domainName}
                 </td>
                 <td className="border space-x-2  border-gray-300 px-4 py-2 text-center">
-                <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer">
+                <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer" onClick={()=>{handleView((item))}}>
                   <FaEye />
                   </button>
                   <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => {handleDelete(item?._id)}}>

@@ -49,7 +49,11 @@ import { MdDelete } from "react-icons/md";
         console.error("Error deleting sale:", error);
       }
     };
-    
+    const handleView=(item)=>{
+      navigate("/transferview",{state:{
+        item
+      }})
+    }
     const handleDelete=(id)=>{
       if(!id) return
       deleteCallBack(id)
@@ -112,7 +116,7 @@ import { MdDelete } from "react-icons/md";
                 <td className="border px-3 py-2">{item.budget}</td>
                 <td className="border px-3 py-2">{item.sentTo}</td> */}
                 <td className="border px-3 space-x-2 py-2">
-                <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer">
+                <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer" onClick={()=>{handleView((item))}}>
                   <FaEye />
                   </button>
                   <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => {handleDelete(item?._id)}}>
