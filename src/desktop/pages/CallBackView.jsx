@@ -32,7 +32,7 @@ console.log(callbackdata)
   const handleEdit = async (id) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/${id}`, {
-        method: "PUT", // or "PATCH" depending on your API
+        method: "PUT", 
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -42,7 +42,7 @@ console.log(callbackdata)
   
       if (response.ok) {
         console.log("Callback updated successfully");
-        navigate("/callbacklist"); 
+        navigate("/callbacklist");
       } else {
         console.error("Failed to update callback");
       }
