@@ -42,10 +42,11 @@ const callbackdata=location?.state?.item;
   
       if (response.ok) {
         console.log("Callback updated successfully");
-        navigate("/callbacklist");
+        navigate("/callbacklist"); 
       } else {
         console.error("Failed to update callback");
       }
+      navigate("/callbacklist"); 
     } catch (error) {
       console.error("Error updating callback:", error);
     }
