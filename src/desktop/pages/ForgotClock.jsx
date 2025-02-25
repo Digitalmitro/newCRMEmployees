@@ -25,6 +25,12 @@ function ForgotClock() {
     fetchAllForgot();
   }, []);
 
+  const adjustForTimezone = (date) => {
+    const timezoneOffset = date.getTimezoneOffset() * 60000; // Convert offset to milliseconds
+    return new Date(date.getTime() - timezoneOffset);
+  };
+  
+
   // Update paginated data when clock or currentPage changes
   useEffect(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -49,10 +55,11 @@ function ForgotClock() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
-            ConcernDate: selectedDate.toISOString().split("T")[0], // Format date
+            ConcernDate: adjustForTimezone(selectedDate).toISOString().split("T")[0], // Corrected date
             message: comment,
             concernType: "Forgot Clock",
           }),
+          
         }
       );
 

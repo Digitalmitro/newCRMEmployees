@@ -36,6 +36,12 @@ function BookLeave() {
     }
 
     setLoading(true);
+
+    const adjustForTimezone = (date) => {
+      const timezoneOffset = date.getTimezoneOffset() * 60000; // Convert offset to milliseconds
+      return new Date(date.getTime() - timezoneOffset);
+    };
+    
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_API}/concern/submit`,
@@ -46,10 +52,11 @@ function BookLeave() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
-            ConcernDate: selectedDate.toISOString().split("T")[0],
+            ConcernDate: adjustForTimezone(selectedDate).toISOString().split("T")[0], // Corrected date
             message: comment,
             concernType: "Book Leave",
           }),
+          
         }
       );
 
