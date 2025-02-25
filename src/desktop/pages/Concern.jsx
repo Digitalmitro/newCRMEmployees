@@ -117,7 +117,8 @@ function Concern() {
           selected={startDate}
           onChange={(date) => setStartDate(date)}
           showTimeSelect
-          dateFormat="yyyy-MM-dd HH:mm"
+          showTimeSelectOnly
+          dateFormat="HH:mm"
           placeholderText="Actual in Time"
           className="border px-4 py-2 outline-none border-gray-400 text-[12px] rounded"
         />
@@ -126,7 +127,8 @@ function Concern() {
           selected={endDate}
           onChange={(date) => setEndDate(date)}
           showTimeSelect
-          dateFormat="yyyy-MM-dd HH:mm"
+          showTimeSelectOnly
+          dateFormat="HH:mm"
           placeholderText="Actual out Time"
           className="border px-4 py-2 outline-none border-gray-400 text-[12px] rounded"
         />
