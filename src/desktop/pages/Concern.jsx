@@ -5,7 +5,7 @@ import { useAuth } from "../../context/authContext";
 
 function Concern() {
   const { userData, allConcerns } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState();
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [comment, setComment] = useState("");
@@ -38,6 +38,12 @@ function Concern() {
     }
 
     setLoading(true);
+
+    const adjustForTimezone = (date) => {
+      const timezoneOffset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
+      return new Date(date.getTime() - timezoneOffset);
+    };
+    
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_API}/concern/submit`,
@@ -48,12 +54,13 @@ function Concern() {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
-            ConcernDate: selectedDate.toISOString().split("T")[0],
-            ActualPunchIn: startDate.toISOString(),
-            ActualPunchOut: endDate.toISOString(),
+            ConcernDate: adjustForTimezone(selectedDate).toISOString().split("T")[0],
+            ActualPunchIn: adjustForTimezone(startDate).toISOString(),
+            ActualPunchOut: adjustForTimezone(endDate).toISOString(),
             message: comment,
             concernType: "Employee Concern",
           }),
+          
         }
       );
 
