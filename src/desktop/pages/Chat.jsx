@@ -2,8 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import profile from "../../assets/desktop/profileIcon.svg";
 import { Send, Paperclip } from "lucide-react";
-import { useLocation } from "react-router-dom";
-import {
+import {  useLocation,  } from "react-router-dom";
+import socket,{
   sendMessage,
   onMessageReceived,
   connectSocket,
@@ -17,10 +17,11 @@ import EmojiPicker from "emoji-picker-react";
 
 const Chat = () => {
   const location = useLocation();
+
   const user = location.state;
   const receiverId = user?.id;
   const selectedUser = location?.state?.selectedUsers;
-  const { userData } = useAuth();
+  const { userData,getAllUsers } = useAuth();
   const senderId = userData?.userId;
   const [isOnline, setIsOnline] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -40,7 +41,7 @@ const Chat = () => {
       console.error("Error marking messages as read:", error);
     }
   };
-  
+ 
   // Call this function when the chat opens
   useEffect(() => {
     if (receiverId) {

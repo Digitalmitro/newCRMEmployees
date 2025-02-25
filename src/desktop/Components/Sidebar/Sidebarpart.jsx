@@ -11,7 +11,8 @@ import edit from "../../../assets/desktop/edit.svg";
 import logo from "../../../assets/desktop/logo.svg";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
-import { use } from "react";
+import socket from "../../../utils/socket"
+
 
 function Sidebarpart() {
   const { getChannels } = useAuth();
@@ -24,13 +25,21 @@ function Sidebarpart() {
   };
   const allUsers = async () => {
     const users = await getAllUsers();
-
     setEmployees(users);
   };
 
   useEffect(() => {
     channel();
     allUsers();
+    socket.on("updateUnread", async () => {
+      allUsers() // Re-fetch users from API
+    });
+
+    return () => {
+      socket.off("updateUnread"); // Cleanup on unmount
+      socket.disconnect();
+    };
+   
   }, []);
 
   const handleCowrokers = () => {
