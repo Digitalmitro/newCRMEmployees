@@ -43,11 +43,12 @@ console.log(callbackdata)
   
       if (response.ok) {
         console.log("Callback updated successfully");
+      navigate("/transferlist"); 
+
        
       } else {
         console.error("Failed to update callback");
       }
-      // navigate("/transferlist"); 
     } catch (error) {
       console.error("Error updating callback:", error);
     }
@@ -96,7 +97,7 @@ console.log(callbackdata)
 
 
       <div className="pt-10 px-2 ">
-        {/* <form className="w-full" > */}
+        
           <div className="grid grid-cols-2 ">
             {/* <div className="space-x-8 mb-4">
               <label htmlFor="text" className="text-[14px] font-medium">
@@ -239,7 +240,7 @@ console.log(callbackdata)
           <div className="flex justify-center pt-8">
         <button type="submit" className="border  border-orange-500 text-[12px] py-0.5 text-orange-500 px-4 rounded cursor-pointer" onClick={()=>handleEdit(callbackdata?._id)}>Edit</button>
         </div>
-        {/* </form> */}
+        
         
         
       </div>
