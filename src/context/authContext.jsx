@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
     const getAllUsers=async()=>{
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/auth/all`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/message/recentChats`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
     
             if (response.ok) {
                 const data = await response.json();
-                return data?.users;
+                return data;
             }
         } catch (error) {
             console.error("Error fetching data:", error.message);

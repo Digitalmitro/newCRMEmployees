@@ -52,38 +52,7 @@ const callbackdata=location?.state?.item;
     }
   };
   
-  // const handleSubmit=async(e)=>{
-  //   e.preventDefault();
-   
-  //   try {
-  //     const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/callback/`,{
-  //       method:"POST",
-  //       headers:{
-  //         "Content-Type": "application/json",
-  //         "Authorization":`Bearer ${localStorage.getItem("token")}`
-  //       },
-  //       body: JSON.stringify(callback)
-  //     })
-  //     setCallback({
-  //       name: "",
-  //       email: "",
-  //       phone: "",
-  //       calldate: "",
-  //       domainName: "",
-  //       buget: "",
-  //       country: "",
-  //       address: "",
-  //       comments: "",
-  //     });
-  //     navigate("/callbacklist")
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }
 
-  // useEffect(()=>{
-  //   handleSubmit()
-  // })
   return (
     <div className="p-4">
       <div className="flex justify-between px-4 border-b-2 border-gray-300 p-4">

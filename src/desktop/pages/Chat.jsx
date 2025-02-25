@@ -1,13 +1,14 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import profile from "../../assets/desktop/profileIcon.svg";
-import { Send,Paperclip } from "lucide-react";
+import { Send, Paperclip } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import {
   sendMessage,
   onMessageReceived,
   connectSocket,
-  onUserStatusUpdate
+  onUserStatusUpdate,
+  fetchOnlineUsers,
 } from "../../utils/socket";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
@@ -19,55 +20,62 @@ const Chat = () => {
   const user = location.state;
   const receiverId = user?.id;
   const selectedUser = location?.state?.selectedUsers;
-  // console.log(selectedUser);
   const { userData } = useAuth();
   const senderId = userData?.userId;
   const [isOnline, setIsOnline] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const messagesEndRef = useRef(null); // Auto-scroll reference
+  const messagesEndRef = useRef(null);
   const [file, setFile] = useState(null);
-  // ✅ Load chat history
+
+  // ✅ Connect Socket and Load Data
   useEffect(() => {
+    connectSocket();
+
+    // ✅ Fetch chat history
     const fetchMessages = async () => {
+      if (!senderId || !receiverId) return;
       try {
         const res = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_API
-          }/message/messages/${senderId}/${receiverId}`
+          `${import.meta.env.VITE_BACKEND_API}/message/messages/${senderId}/${receiverId}`
         );
         setMessages(res.data?.messages);
-        // console.log(res.data?.messages)
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
+    fetchMessages();
 
-    if (senderId && receiverId) {
-      fetchMessages();
-    }
+    // ✅ Fetch online users on mount
+    fetchOnlineUsers((onlineUsers) => {
+      setIsOnline(onlineUsers.includes(receiverId));
+    });
 
-    connectSocket();
-
-    onMessageReceived((newMessage) => {
+    // ✅ Listen for incoming messages
+    const messageListener = (newMessage) => {
       if (
-        (newMessage.sender === senderId &&
-          newMessage.receiver === receiverId) ||
+        (newMessage.sender === senderId && newMessage.receiver === receiverId) ||
         (newMessage.sender === receiverId && newMessage.receiver === senderId)
       ) {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       }
-    });
-    
-    onUserStatusUpdate(({ userId, status }) => {
+    };
+    onMessageReceived(messageListener);
+
+    // ✅ Listen for user status updates
+    const statusListener = ({ userId, status }) => {
       if (userId === receiverId) {
         setIsOnline(status === "online");
       }
-    });
+    };
+    onUserStatusUpdate(statusListener);
 
+    // ✅ Cleanup on unmount
     return () => {
-      console.log("🛑 Unsubscribing from message listener");
+      console.log("🛑 Unsubscribing from listeners");
+      onMessageReceived(() => {}); // Remove listener
+      onUserStatusUpdate(() => {}); // Remove listener
     };
   }, [senderId, receiverId]);
 
@@ -79,7 +87,7 @@ const Chat = () => {
   // ✅ Send message
   const handleSendMessage = async () => {
     if (!input.trim()) return;
-
+    
     const newMessage = {
       sender: senderId,
       receiver: receiverId,
@@ -88,10 +96,7 @@ const Chat = () => {
     };
 
     try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_API}/message/send-message`,
-        newMessage
-      );
+      await axios.post(`${import.meta.env.VITE_BACKEND_API}/message/send-message`, newMessage);
       sendMessage(senderId, receiverId, input);
       setInput("");
     } catch (error) {
@@ -102,21 +107,20 @@ const Chat = () => {
   // ✅ Handle emoji selection
   const handleEmojiClick = (emojiData) => {
     setInput((prev) => prev + emojiData.emoji);
-
-    setTimeout(() => {
-      document.getElementById("chatInput").focus();
-    }, 0);
+    setTimeout(() => document.getElementById("chatInput").focus(), 0);
   };
 
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
       <div className="flex gap-4 mb-6 border-b pt-2 px-8 pb-2">
-        <p className=" rounded-full border items-center  flex justify-center w-10 h-10 text-xl  text-white bg-orange-500">
+        <p className="rounded-full border flex items-center justify-center w-10 h-10 text-xl text-white bg-orange-500">
           {user?.name?.charAt(0) || selectedUser?.[0]?.name?.charAt(0)}
         </p>
         <div>
           <h2 className="text-sm font-semibold">{user?.name}</h2>
-          <p className="text-[10px] text-green-500 font-semibold">{isOnline ? "🟢 Online" : "🔴 Offline"}</p>
+          <p className="text-[10px] text-green-500 font-semibold">
+            {isOnline ? "🟢 Online" : "🔴 Offline"}
+          </p>
         </div>
       </div>
 
@@ -160,12 +164,7 @@ const Chat = () => {
             </div>
           )}
         </div>
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          className="hidden"
-          id="fileInput"
-        />
+        <input type="file" onChange={(e) => setFile(e.target.files[0])} className="hidden" id="fileInput" />
         <label htmlFor="fileInput" className="cursor-pointer">
           <Paperclip size={22} className="text-gray-500" />
         </label>
@@ -180,10 +179,7 @@ const Chat = () => {
           onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
         />
 
-        <button
-          onClick={handleSendMessage}
-          className="ml-2 p-2 bg-orange-400 text-white rounded-lg"
-        >
+        <button onClick={handleSendMessage} className="ml-2 p-2 bg-orange-400 text-white rounded-lg">
           <Send className="w-5 h-5" />
         </button>
       </div>

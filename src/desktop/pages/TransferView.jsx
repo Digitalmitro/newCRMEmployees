@@ -4,8 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 function TransferView() {
 const navigate=useNavigate()
 const location=useLocation()
-const callbackdata=location?.state?.item;
-// console.log(callbackdata)
+const callbackdata=location?.state?.trans;
+console.log(callbackdata)
 
   const [callback,setCallback]=useState({
     name:callbackdata?.name,
@@ -30,6 +30,7 @@ const callbackdata=location?.state?.item;
   } 
 
   const handleEdit = async (id) => {
+  
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/transfer/${id}`, {
         method: "PUT", // or "PATCH" depending on your API
@@ -46,7 +47,7 @@ const callbackdata=location?.state?.item;
       } else {
         console.error("Failed to update callback");
       }
-      navigate("/transferlist"); 
+      // navigate("/transferlist"); 
     } catch (error) {
       console.error("Error updating callback:", error);
     }
@@ -95,7 +96,7 @@ const callbackdata=location?.state?.item;
 
 
       <div className="pt-10 px-2 ">
-        <form className="w-full" onSubmit={handleSubmit}>
+        {/* <form className="w-full" > */}
           <div className="grid grid-cols-2 ">
             {/* <div className="space-x-8 mb-4">
               <label htmlFor="text" className="text-[14px] font-medium">
@@ -236,9 +237,9 @@ const callbackdata=location?.state?.item;
             </div>
           </div>
           <div className="flex justify-center pt-8">
-        <button type="submit" className="border  border-orange-500 text-[12px] py-0.5 text-orange-500 px-4 rounded cursor-pointer" onClick={()=>{handleEdit(callbackdata?._id)}}>Edit</button>
+        <button type="submit" className="border  border-orange-500 text-[12px] py-0.5 text-orange-500 px-4 rounded cursor-pointer" onClick={()=>handleEdit(callbackdata?._id)}>Edit</button>
         </div>
-        </form>
+        {/* </form> */}
         
         
       </div>

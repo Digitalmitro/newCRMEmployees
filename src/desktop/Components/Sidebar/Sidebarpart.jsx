@@ -11,6 +11,7 @@ import edit from "../../../assets/desktop/edit.svg";
 import logo from "../../../assets/desktop/logo.svg";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
+import { use } from "react";
 
 function Sidebarpart() {
   const { getChannels } = useAuth();
@@ -175,7 +176,7 @@ function Sidebarpart() {
               <li
                 key={i}
                 className="block p-2 text-gray-700 text-[14px] font-medium cursor-pointer"
-                onClick={() => handleChat(user.name, user._id)}
+                onClick={() => handleChat(user.name, user.id)}
               >
                 <p className="flex space-x-2">
                   <span
@@ -186,8 +187,8 @@ function Sidebarpart() {
                   >
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
-                  <span>{user.name}</span>
-                  <span>{`(1)`}</span>
+                  <span>{user?.name}</span>
+                  <span>{user?.unreadMessages ? `(${user?.unreadMessages})` :""}</span>
                 </p>
               </li>
             ))}

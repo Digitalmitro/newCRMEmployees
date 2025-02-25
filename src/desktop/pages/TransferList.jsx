@@ -49,9 +49,9 @@ import { MdDelete } from "react-icons/md";
         console.error("Error deleting sale:", error);
       }
     };
-    const handleView=(item)=>{
+    const handleView=(trans)=>{
       navigate("/transferview",{state:{
-        item
+        trans
       }})
     }
     const handleDelete=(id)=>{
