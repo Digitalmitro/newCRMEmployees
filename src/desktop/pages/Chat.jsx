@@ -29,6 +29,25 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const [file, setFile] = useState(null);
 
+  const markMessagesAsRead = async (senderId) => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/message/messages/mark-as-read`,
+        { senderId },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  };
+  
+  // Call this function when the chat opens
+  useEffect(() => {
+    if (receiverId) {
+      markMessagesAsRead(receiverId);
+    }
+  }, [receiverId]);
+
   // ✅ Connect Socket and Load Data
   useEffect(() => {
     connectSocket();
