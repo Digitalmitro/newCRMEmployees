@@ -22,6 +22,32 @@ export const AuthProvider = ({ children }) => {
         }      
     }, []);
 
+
+    const allConcerns = async (arg) => { 
+        try {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/concern/user`, {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            }
+          });
+      
+          if (response.ok) {
+            const data = await response.json();
+            const filteredConcerns = data?.concerns?.filter(concern => concern.concernType === arg);
+            console.log(filteredConcerns);
+            return filteredConcerns;
+          } else {
+            console.error("Failed to fetch concerns");
+            return null;
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error.message);
+          return null;
+        }
+      };
+      
+
     const getAllUsers=async()=>{
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/auth/all`, {
@@ -74,7 +100,7 @@ export const AuthProvider = ({ children }) => {
       }
 
     return (
-        <AuthContext.Provider value={{ token, setToken,userData, getChannels, fetchAttendance,getAllUsers }}>
+        <AuthContext.Provider value={{ token, allConcerns, setToken,userData, getChannels, fetchAttendance,getAllUsers }}>
             {children}
         </AuthContext.Provider>
     );

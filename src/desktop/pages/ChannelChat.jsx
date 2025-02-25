@@ -13,7 +13,7 @@ import {
   joinChannel,
 } from "../../utils/socket"; // Socket functions
 import axios from "axios";
-
+import { BsThreeDotsVertical } from "react-icons/bs";
 const ChannelChat = () => {
   const { userData } = useAuth();
   const location = useLocation();
@@ -214,22 +214,27 @@ const ChannelChat = () => {
                 }`}
               style={{
                 width: `${msg.message.length <= 5
-                    ? 90
+                    ? 120
                     : Math.min((msg.message?.length ?? 0) * 15, 300)
                   }px`,
               }}
             >
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-2 justify-between">
                 <p className="text-[10px]">{getSenderName(msg.sender)}</p>
+                <BsThreeDotsVertical size={15}/>
               </div>
 
               <div className="flex gap-2">
                 <span>{msg.message}</span>
               </div>
+
               <span className="text-[9px] flex justify-end">
                 {moment(msg.createdAt).format("HH:mm")}
               </span>
+           
+
             </div>
+           
           </div>
         ))}
         <div ref={messagesEndRef} />
