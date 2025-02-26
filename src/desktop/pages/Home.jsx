@@ -18,7 +18,7 @@ function Home() {
     navigate("/callbacklist")
   }
   const handleSales=()=>{
-    navigate("/callbacklist")
+    navigate("/salelist")
   }
   const handleTransfer=()=>{
     navigate("/transferlist")

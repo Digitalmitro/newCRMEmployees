@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import home from "../../../assets/desktop/home.svg";
 import attendence from "../../../assets/desktop/attendence.svg";
 import bidirection from "../../../assets/desktop/bidirection.svg";
@@ -12,50 +12,74 @@ import logo from "../../../assets/desktop/logo.svg";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
 import socket from "../../../utils/socket"
-
+import axios from "axios";
 
 function Sidebarpart() {
   const { getChannels } = useAuth();
+  const location = useLocation();
   const [employees, setEmployees] = useState([]);
   const [channels, setChannels] = useState([]);
+  const [unreadMessages, setUnreadMessages] = useState({});
   const { getAllUsers, userData } = useAuth();
+  const [openChatId, setOpenChatId] = useState(null);
+  const navigate = useNavigate();
+
   const channel = async () => {
     const data = await getChannels();
     setChannels(data);
   };
-  const allUsers = async () => {
+  const fetchUsers = async () => {
     const users = await getAllUsers();
+    const unreadCounts = {};
+    users.forEach(user => {
+      unreadCounts[user.id] = user.unreadMessages || 0;
+    });
     setEmployees(users);
+    setUnreadMessages(unreadCounts);
   };
 
   useEffect(() => {
     channel();
-    allUsers();
+    fetchUsers();
     socket.on("updateUnread", async () => {
-      allUsers() // Re-fetch users from API
+      fetchUsers()
     });
-
+   
     return () => {
-      socket.off("updateUnread"); // Cleanup on unmount
+      socket.off("updateUnread"); 
       socket.disconnect();
     };
    
   }, []);
 
+  useEffect(() => {
+    const chatState = location.state;
+    if (chatState && chatState.id) {
+      setOpenChatId(chatState.id);   
+    } else {
+      setOpenChatId(null);
+    }
+  }, [location]);
+
   const handleCowrokers = () => {
     navigate("/addCoworker");
   };
 
-  const navigate = useNavigate();
-  const handleChat = (name, id) => {
-    navigate("/chat", {
-      state: {
-        name,
-        id,
-      },
-    });
-    // console.log(name,id)
+  const handleChat = async (name, id) => {
+    setOpenChatId(id);
+    setUnreadMessages(prev => ({
+      ...prev,
+      [id]: 0
+    }));
+    navigate("/chat", { state: { name, id } });  
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_API}/message/messages/mark-as-read`,
+      { senderId: id },
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+    );
+    
   };
+
   const handleChannel = () => {
     navigate("/create-channel");
   };
@@ -181,7 +205,7 @@ function Sidebarpart() {
             Messages <img src={arrow} alt="" className="w-[8px] pt-1" />
           </h3>
           <ul className="mt-2">
-            {employees?.slice(0, 4).map((user, i) => (
+            {employees?.filter(user => user.lastMessageTime)?.slice(0, 8).map((user, i) => (
               <li
                 key={i}
                 className="block p-2 text-gray-700 text-[14px] font-medium cursor-pointer"
@@ -197,7 +221,11 @@ function Sidebarpart() {
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
                   <span>{user?.name}</span>
-                  <span>{user?.unreadMessages ? `(${user?.unreadMessages})` :""}</span>
+                  {unreadMessages[user.id] > 0 && openChatId !== user.id && (
+                      <span className="text-green-500 font-bold">
+                        ({unreadMessages[user.id]})
+                      </span>
+                    )}
                 </p>
               </li>
             ))}

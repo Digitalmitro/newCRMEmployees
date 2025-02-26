@@ -12,6 +12,7 @@ function Searchbar() {
   const [notification, setNotification] = useState([]);
   const token = localStorage.getItem("token");
   const navigate=useNavigate();
+  
   useEffect(() => {
     onNotificationReceived((notification) => {
       setNotification((prev) => [notification, ...prev]); // Add new notification

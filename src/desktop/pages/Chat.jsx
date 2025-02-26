@@ -17,7 +17,6 @@ import EmojiPicker from "emoji-picker-react";
 
 const Chat = () => {
   const location = useLocation();
-
   const user = location.state;
   const receiverId = user?.id;
   const selectedUser = location?.state?.selectedUsers;
@@ -93,7 +92,7 @@ const Chat = () => {
 
     // ✅ Cleanup on unmount
     return () => {
-      console.log("🛑 Unsubscribing from listeners");
+      // console.log("🛑 Unsubscribing from listeners");
       onMessageReceived(() => {}); // Remove listener
       onUserStatusUpdate(() => {}); // Remove listener
     };
@@ -163,7 +162,7 @@ const Chat = () => {
               }px`,
             }}
           >
-            <span>{msg.message}</span>
+            <span className="whitespace-pre-wrap break-words overflow-auto">{msg.message}</span>
             <span className="text-[9px] flex flex-col justify-end">
               {moment(msg.createdAt).format("HH:mm")}
             </span>
