@@ -93,7 +93,7 @@ function Attendance() {
           className=" rounded-full border items-center  flex justify-center w-10 h-10 text-2xl font-medium text-white bg-orange-500"
         >{userData?.name?.charAt(0)}</p>
         <div>
-          <h2 className="text-md font-semibold">{userData.name}</h2>
+          <h2 className="text-md font-semibold">{userData?.name}</h2>
           <p className="text-sm text-green-500">● Active</p>
         </div>
         <button className=" px-4 text-gray-500 hover:text-gray-700">
