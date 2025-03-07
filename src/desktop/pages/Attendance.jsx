@@ -14,23 +14,27 @@ function Attendance() {
   };
   const handleForgot = () => {
     navigate("/forgotClock");
-  }
+  };
   const handleConcern = () => {
     navigate("/concern");
-  }
+  };
   const handleBookLeave = () => {
     navigate("/book-leave");
   };
   const [attendanceData, setAttendanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const duration = moment.duration(attendanceData?.workingTime, "minutes");
-  const clockinTime = attendanceData?.firstPunchIn ? moment(attendanceData?.firstPunchIn).format("HH:mm") : "00:00";
-  const clockoutTime = attendanceData?.punchOut ? moment(attendanceData?.punchOut).format("HH:mm") : "00:00";
+  const clockinTime = attendanceData?.firstPunchIn
+    ? moment(attendanceData?.firstPunchIn).format("HH:mm")
+    : "00:00";
+  const clockoutTime = attendanceData?.punchOut
+    ? moment(attendanceData?.punchOut).format("HH:mm")
+    : "00:00";
   const getAttendance = async () => {
     const data = await fetchAttendance("today");
     if (data) {
       setAttendanceData(data?.data?.[0]);
-      setIsClockedOut(!data?.data?.[0]?.isPunchedIn)
+      setIsClockedOut(!data?.data?.[0]?.isPunchedIn);
     }
   };
   useEffect(() => {
@@ -78,7 +82,7 @@ function Attendance() {
         }),
       });
 
-      getAttendance()
+      getAttendance();
     } catch (error) {
       console.error("Error in punch-in API:", error);
     }
@@ -89,9 +93,9 @@ function Attendance() {
     <div className="w-full p-6 bg-gray-50">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <p
-          className=" rounded-full border items-center  flex justify-center w-10 h-10 text-2xl font-medium text-white bg-orange-500"
-        >{userData?.name?.charAt(0)}</p>
+        <p className=" rounded-full border items-center  flex justify-center w-10 h-10 text-2xl font-medium text-white bg-orange-500">
+          {userData?.name?.charAt(0)}
+        </p>
         <div>
           <h2 className="text-md font-semibold">{userData.name}</h2>
           <p className="text-sm text-green-500">● Active</p>
@@ -142,12 +146,13 @@ function Attendance() {
         </div>
         <div>
           <p className="text-gray-500 text-sm">IP Address:</p>
-          <p className="font-semibold">{attendanceData?.ip
-          }</p>
+          <p className="font-semibold">{attendanceData?.ip}</p>
         </div>
         <div>
           <p className="text-gray-500 text-sm">Status:</p>
-          <p className="font-semibold text-green-500">{attendanceData?.status}</p>
+          <p className="font-semibold text-green-500">
+            {attendanceData?.status}
+          </p>
         </div>
         <div>
           <p className="text-gray-500 text-sm">Work Status:</p>
@@ -163,7 +168,10 @@ function Attendance() {
         >
           + Book Leave
         </button>
-        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleForgot}>
+        <button
+          className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
+          onClick={handleForgot}
+        >
           Forgot to Clock
         </button>
         <button
@@ -172,7 +180,10 @@ function Attendance() {
         >
           View Calendar
         </button>
-        <button className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleConcern}>
+        <button
+          className="border border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer"
+          onClick={handleConcern}
+        >
           Employee Concern
         </button>
       </div>
