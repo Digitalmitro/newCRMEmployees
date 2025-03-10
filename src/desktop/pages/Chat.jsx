@@ -140,11 +140,13 @@ const Chat = () => {
     let messageContent = input.trim();
 
     if (file) {
+      setloading(true)
       const fileUrl = await uploadFile(file);
 
       if (!fileUrl) return;
       messageContent = fileUrl.fileUrl;
       setFile(null);
+      setloading(false)
     }
     const newMessage = {
       sender: senderId,

@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     
             if (response.ok) {
                 const data = await response.json();
-                return data;
+                return data?.users;
             }
         } catch (error) {
             console.error("Error fetching data:", error.message);
