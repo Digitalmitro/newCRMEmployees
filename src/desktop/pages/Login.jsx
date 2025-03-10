@@ -39,6 +39,7 @@ function Login() {
 
       // Redirect to home or the intended page
       navigate("/");
+      window.location.reload();
     } catch (err) {
       setError(err.message);
     } finally {
