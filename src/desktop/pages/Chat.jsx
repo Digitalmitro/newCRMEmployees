@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import profile from "../../assets/desktop/profileIcon.svg";
 import { Send, Paperclip } from "lucide-react";
-import { useLocation, } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import socket, {
   sendMessage,
   onMessageReceived,
@@ -29,13 +29,16 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [loading, setloading] = useState(false);
 
   const markMessagesAsRead = async (senderId) => {
     try {
       await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/message/messages/mark-as-read`,
         { senderId },
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
     } catch (error) {
       console.error("Error marking messages as read:", error);
@@ -58,7 +61,9 @@ const Chat = () => {
       if (!senderId || !receiverId) return;
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/message/messages/${senderId}/${receiverId}`
+          `${
+            import.meta.env.VITE_BACKEND_API
+          }/message/messages/${senderId}/${receiverId}`
         );
         setMessages(res.data?.messages);
       } catch (error) {
@@ -75,7 +80,8 @@ const Chat = () => {
     // ✅ Listen for incoming messages
     const messageListener = (newMessage) => {
       if (
-        (newMessage.sender === senderId && newMessage.receiver === receiverId) ||
+        (newMessage.sender === senderId &&
+          newMessage.receiver === receiverId) ||
         (newMessage.sender === receiverId && newMessage.receiver === senderId)
       ) {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -94,8 +100,8 @@ const Chat = () => {
     // ✅ Cleanup on unmount
     return () => {
       // console.log("🛑 Unsubscribing from listeners");
-      onMessageReceived(() => { }); // Remove listener
-      onUserStatusUpdate(() => { }); // Remove listener
+      onMessageReceived(() => {}); // Remove listener
+      onUserStatusUpdate(() => {}); // Remove listener
     };
   }, [senderId, receiverId]);
 
@@ -103,7 +109,6 @@ const Chat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
 
   //file upload
   const uploadFile = async (file) => {
@@ -115,7 +120,9 @@ const Chat = () => {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_API}/files/upload`,
         formData,
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
       setUploading(false);
       return response.data;
@@ -125,7 +132,6 @@ const Chat = () => {
       return null;
     }
   };
-
 
   // ✅ Send message
   const handleSendMessage = async () => {
@@ -148,7 +154,10 @@ const Chat = () => {
     };
 
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/message/send-message`, newMessage);
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/message/send-message`,
+        newMessage
+      );
       sendMessage(senderId, receiverId, messageContent);
       setInput("");
     } catch (error) {
@@ -209,20 +218,26 @@ const Chat = () => {
             <div
               key={index}
               className={`p-2 max-w-xs rounded-lg mb-2 flex justify-between 
-                ${msg.sender === senderId
-                  ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
-                  : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
+                ${
+                  msg.sender === senderId
+                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
+                    : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
                 }`}
               style={{
-                width: `${msg.message.length <= 5
-                  ? 90
-                  : Math.min((msg.message?.length ?? 0) * 15, 300)
-                  }px`,
+                width: `${
+                  msg.message.length <= 5
+                    ? 90
+                    : Math.min((msg.message?.length ?? 0) * 15, 300)
+                }px`,
               }}
             >
               {isImage(msg.message) ? (
                 <>
-                  <img src={msg.message} alt="Sent Image" className="w-45 h-auto rounded-lg" />
+                  <img
+                    src={msg.message}
+                    alt="Sent Image"
+                    className="w-45 h-auto rounded-lg"
+                  />
                   <a
                     href={msg.message}
                     download
@@ -233,7 +248,9 @@ const Chat = () => {
                 </>
               ) : isDocument(msg.message) ? (
                 <div className="flex items-center gap-2 bg-gray-200 text-black p-2 rounded-lg">
-                  <span className="truncate w-20">{msg.message.split("/").pop()}</span>
+                  <span className="truncate w-20">
+                    {msg.message.split("/").pop()}
+                  </span>
                   <a
                     href={msg.message}
                     download
@@ -243,11 +260,18 @@ const Chat = () => {
                   </a>
                 </div>
               ) : msg.message.startsWith("http") ? (
-                <a href={msg.message} target="_blank" rel="noopener noreferrer" className="underline">
+                <a
+                  href={msg.message}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
                   📎 File Attachment
                 </a>
               ) : (
-                <span className="whitespace-pre-wrap break-words overflow-auto">{msg.message}</span>
+                <span className="whitespace-pre-wrap break-words overflow-auto">
+                  {msg.message}
+                </span>
               )}
               <span className="text-[9px] flex flex-col justify-end">
                 {moment(msg.createdAt).format("HH:mm")}
@@ -258,36 +282,59 @@ const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white flex items-center border-t fixed bottom-0 w-[65%] space-x-2">
-        <div className="relative">
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-            <BsEmojiSmile size={22} className="cursor-pointer text-gray-500" />
+      <div className="p-4 bg-white flex flex-col items-center border-t fixed bottom-0 w-[65%] space-x-2">
+        
+         {
+          loading && (
+            <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 mb-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          )
+         }
+        
+
+        <div className="flex w-full items-center  space-x-2">
+          <div className="relative">
+            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+              <BsEmojiSmile
+                size={22}
+                className="cursor-pointer text-gray-500"
+              />
+            </button>
+
+            {showEmojiPicker && (
+              <div className="absolute bottom-10 left-0 z-50">
+                <EmojiPicker onEmojiClick={handleEmojiClick} />
+              </div>
+            )}
+          </div>
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+            className="hidden"
+            id="fileInput"
+          />
+          <label htmlFor="fileInput" className="cursor-pointer">
+            <Paperclip size={22} className="text-gray-500" />
+          </label>
+
+          <input
+            id="chatInput"
+            type="text"
+            className="flex-1 p-2 border rounded-lg outline-none text-[15px] w-full"
+            placeholder="Type a message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+          />
+
+          <button
+            onClick={handleSendMessage}
+            className="ml-2 p-2 bg-orange-400 text-white rounded-lg"
+          >
+            <Send className="w-5 h-5" />
           </button>
-
-          {showEmojiPicker && (
-            <div className="absolute bottom-10 left-0 z-50">
-              <EmojiPicker onEmojiClick={handleEmojiClick} />
-            </div>
-          )}
         </div>
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} className="hidden" id="fileInput" />
-        <label htmlFor="fileInput" className="cursor-pointer">
-          <Paperclip size={22} className="text-gray-500" />
-        </label>
-
-        <input
-          id="chatInput"
-          type="text"
-          className="flex-1 p-2 border rounded-lg outline-none text-[15px] w-full"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-        />
-
-        <button onClick={handleSendMessage} className="ml-2 p-2 bg-orange-400 text-white rounded-lg">
-          <Send className="w-5 h-5" />
-        </button>
       </div>
     </div>
   );
