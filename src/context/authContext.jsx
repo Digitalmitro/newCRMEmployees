@@ -92,7 +92,13 @@ export const AuthProvider = ({ children }) => {
     };
 
     const getChannels=async()=>{
-        const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/api/all`)
+        const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/api/all`,{
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        })
         if(response.ok){
           const data=await response.json();
           return data
