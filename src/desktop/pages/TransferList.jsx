@@ -3,6 +3,7 @@
   import moment from "moment";
   import { FaEye } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
+import { onSoftRefresh } from "../../utils/socket";
   function TransferList() {
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -11,7 +12,16 @@ import { MdDelete } from "react-icons/md";
     const navigate = useNavigate();
   
     useEffect(() => {
-      fetchData(currentPage);
+      const unsubscribe = onSoftRefresh((data) => {
+      if (data.type === "Transfer_Employee") {
+       fetchData(currentPage);
+      }
+
+    });
+
+       fetchData(currentPage);
+    return () => unsubscribe(); // Cleanup on unmount
+    
     }, [currentPage]);
   
     const fetchData = async (page) => {

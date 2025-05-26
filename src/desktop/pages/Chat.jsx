@@ -8,12 +8,13 @@ import socket, {
   onMessageReceived,
   connectSocket,
   onUserStatusUpdate,
-  fetchOnlineUsers,
+  fetchOnlineUsers
 } from "../../utils/socket";
 import { useAuth } from "../../context/authContext";
 import moment from "moment";
 import { BsEmojiSmile } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
+import { downloadImage } from "../../utils/helper";
 
 const Chat = () => {
   const location = useLocation();
@@ -61,8 +62,7 @@ const Chat = () => {
       if (!senderId || !receiverId) return;
       try {
         const res = await axios.get(
-          `${
-            import.meta.env.VITE_BACKEND_API
+          `${import.meta.env.VITE_BACKEND_API
           }/message/messages/${senderId}/${receiverId}`
         );
         setMessages(res.data?.messages);
@@ -100,8 +100,8 @@ const Chat = () => {
     // ✅ Cleanup on unmount
     return () => {
       // console.log("🛑 Unsubscribing from listeners");
-      onMessageReceived(() => {}); // Remove listener
-      onUserStatusUpdate(() => {}); // Remove listener
+      onMessageReceived(() => { }); // Remove listener
+      onUserStatusUpdate(() => { }); // Remove listener
     };
   }, [senderId, receiverId]);
 
@@ -191,46 +191,21 @@ const Chat = () => {
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
-        {/* {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`p-2 max-w-xs rounded-lg mb-2 flex justify-between 
-            ${
-              msg.sender === senderId
-                ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
-                : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
-            }
-            `}
-            style={{
-              width: `${
-                msg.message.length <= 5
-                  ? 90
-                  : Math.min((msg.message?.length ?? 0) * 15, 300)
-              }px`,
-            }}
-          >
-            <span className="whitespace-pre-wrap break-words overflow-auto">{msg.message}</span>
-            <span className="text-[9px] flex flex-col justify-end">
-              {moment(msg.createdAt).format("HH:mm")}
-            </span>
-          </div>
-        ))} */}
+
         {messages.map((msg, index) => {
           return (
             <div
               key={index}
               className={`p-2 max-w-xs rounded-lg mb-2 flex justify-between 
-                ${
-                  msg.sender === senderId
-                    ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
-                    : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
+                ${msg.sender === senderId
+                  ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
+                  : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
                 }`}
               style={{
-                width: `${
-                  msg.message.length <= 5
+                width: `${msg.message.length <= 5
                     ? 90
                     : Math.min((msg.message?.length ?? 0) * 15, 300)
-                }px`,
+                  }px`,
               }}
             >
               {isImage(msg.message) ? (
@@ -240,13 +215,12 @@ const Chat = () => {
                     alt="Sent Image"
                     className="w-45 h-auto rounded-lg"
                   />
-                  <a
-                    href={msg.message}
-                    download
+                  <button
+                    onClick={() => downloadImage(msg.message)}
                     className="px-2 py-1 bg-blue-000 text-white text-xs rounded-full text-center mt-1 self-start shadow-md"
                   >
                     📥 Download
-                  </a>
+                  </button>
                 </>
               ) : isDocument(msg.message) ? (
                 <div className="flex items-center gap-2 bg-gray-200 text-black p-2 rounded-lg">
@@ -266,9 +240,10 @@ const Chat = () => {
                   href={msg.message}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline"
+                  className="underline break-words text-white break-all text-[14px]"
                 >
-                  📎 File Attachment
+                {msg.message}
+                
                 </a>
               ) : (
                 <span className="whitespace-pre-wrap break-words overflow-auto">
@@ -285,15 +260,15 @@ const Chat = () => {
       </div>
 
       <div className="p-4 bg-white flex flex-col items-center border-t fixed bottom-0 w-[65%] space-x-2">
-        
-         {
+
+        {
           loading && (
             <div className="flex items-center justify-center">
-            <div className="w-5 h-5 border-2 mb-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
+              <div className="w-5 h-5 border-2 mb-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
           )
-         }
-        
+        }
+
 
         <div className="flex w-full items-center  space-x-2">
           <div className="relative">

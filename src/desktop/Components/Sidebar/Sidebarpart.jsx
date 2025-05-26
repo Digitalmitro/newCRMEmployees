@@ -83,6 +83,8 @@ function Sidebarpart() {
   const handleChannel = () => {
     navigate("/create-channel");
   };
+
+  
   const handleChannelChat = (name, id) => {
     navigate("/channelchat", {
       state: {
@@ -91,6 +93,8 @@ function Sidebarpart() {
       },
     });
   };
+
+  console.log(employees);
 
   return (
     <div className="  flex ">

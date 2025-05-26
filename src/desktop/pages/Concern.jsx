@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { useAuth } from "../../context/authContext";
+import { onSoftRefresh } from "../../utils/socket";
 
 function Concern() {
   const { userData, allConcerns } = useAuth();
@@ -27,7 +28,14 @@ function Concern() {
   };
 
   useEffect(() => {
+    const unsubscribe = onSoftRefresh((data) => {
+      if (data.type === "Concern_Employee") {
+        fetchAllConcern();
+      }
+    });
     fetchAllConcern();
+    return () => unsubscribe(); // Cleanup on unmount
+
   }, []);
 
   // Handle form submission
@@ -43,7 +51,7 @@ function Concern() {
       const timezoneOffset = date.getTimezoneOffset() * 60000; // Offset in milliseconds
       return new Date(date.getTime() - timezoneOffset);
     };
-    
+
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_API}/concern/submit`,
@@ -60,7 +68,7 @@ function Concern() {
             message: comment,
             concernType: "Employee Concern",
           }),
-          
+
         }
       );
 

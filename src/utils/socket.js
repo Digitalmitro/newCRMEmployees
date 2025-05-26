@@ -138,6 +138,14 @@ export const onChannelMessageReceived = (callback) => {
   });
 };
 
+export const onSoftRefresh = (callback) => {
+  socket.on("soft-refresh", callback);
+  return () => {
+    socket.off("soft-refresh", callback);
+  };
+};
+
+
 // Disconnect socket
 export const disconnectSocket = () => {
   console.log("🔌 Disconnecting socket...");
