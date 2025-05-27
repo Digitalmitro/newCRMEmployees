@@ -26,9 +26,16 @@ import ChannelChat from "./pages/ChannelChat";
 import CallbackView from "./pages/CallBackView";
 import SalesView from "./pages/SalesView";
 import TransferView from "./pages/TransferView";
+import { useSocketSetup } from "../hooks/useSocketSetup";
+import { useGlobalNotification } from "../hooks/useGlobalNotifications";
 
 
 function DesktopRouting() {
+
+   useSocketSetup();
+   useGlobalNotification(); 
+
+
   return (
     
       <Routes>

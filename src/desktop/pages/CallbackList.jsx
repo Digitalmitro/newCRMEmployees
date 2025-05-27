@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FaEye } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import moment from "moment";
+import { onSoftRefresh } from "../../utils/socket";
 function CallbackList() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -12,7 +13,18 @@ function CallbackList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchData(currentPage);
+
+    const unsubscribe = onSoftRefresh((data) => {
+      if (data.type === "Callback") {
+        fetchData(currentPage);
+      }
+
+    });
+
+    
+      fetchData(currentPage);
+    return () => unsubscribe(); // Cleanup on unmount
+
   }, [currentPage]);
 
   const fetchData = async (page) => {
@@ -52,14 +64,16 @@ function CallbackList() {
     }
   };
 
-  const handleView=(item)=>{
-    navigate("/callbackview",{state:{
-      item
-    }})
+  const handleView = (item) => {
+    navigate("/callbackview", {
+      state: {
+        item
+      }
+    })
   }
-  
-  const handleDelete=(id)=>{
-    if(!id) return
+
+  const handleDelete = (id) => {
+    if (!id) return
     deleteCallBack(id)
   }
 
@@ -81,19 +95,19 @@ function CallbackList() {
         </button>
       </div>
       <div className="pt-6 flex gap-4 justify-start">
-      <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-        Select Month
-      </button>
-      <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-        Select Year
-      </button>
-      <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-        Select Date
-      </button>
-      <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
-        Select Date
-      </button>
-    </div>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
+          Select Month
+        </button>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
+          Select Year
+        </button>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
+          Select Date
+        </button>
+        <button className="border px-4 rounded text-[12px] font-medium pt-1 pb-1">
+          Select Date
+        </button>
+      </div>
       {/* Table */}
       <div className="overflow-x-auto p-4 mt-4">
         <table className="min-w-full border-collapse border border-gray-300">
@@ -128,11 +142,11 @@ function CallbackList() {
                 <td className="border px-3 py-2">{item.budget}</td>
                 <td className="border px-3 py-2">{item.sentTo}</td> */}
                 <td className="border px-3 space-x-2 py-2">
-                  <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer" onClick={()=>{handleView((item))}}>
-                  <FaEye />
+                  <button className="border border-orange-500 text-[12px] py-1 text-orange-500 px-2 rounded cursor-pointer" onClick={() => { handleView((item)) }}>
+                    <FaEye />
                   </button>
-                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => {handleDelete(item?._id)}}>
-                    <MdDelete/>
+                  <button className="border border-red-500 text-[12px] py-1 text-red-500 px-2 rounded cursor-pointer" onClick={() => { handleDelete(item?._id) }}>
+                    <MdDelete />
                   </button>
                 </td>
               </tr>
