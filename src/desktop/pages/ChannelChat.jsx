@@ -14,6 +14,7 @@ import {
 } from "../../utils/socket"; // Socket functions
 import axios from "axios";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { downloadImage } from "../../utils/helper";
 const ChannelChat = () => {
   const { userData } = useAuth();
   const location = useLocation();
