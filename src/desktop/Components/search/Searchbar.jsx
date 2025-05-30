@@ -39,7 +39,7 @@ function Searchbar() {
       })
       return;
     }
-    navigate(`/channelchat/${senderId}`, {
+    navigate(`/channelchat`, {
       state: {
         name: clickedNotification?.title,
         description: clickedNotification?.description,
