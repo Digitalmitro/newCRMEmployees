@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { IoPeopleSharp } from "react-icons/io5";
-import { Send,Paperclip } from "lucide-react";
+import { Send, Paperclip } from "lucide-react";
 import moment from "moment";
 import { useLocation } from "react-router";
 import { BsEmojiSmile } from "react-icons/bs";
@@ -25,6 +25,8 @@ const ChannelChat = () => {
   const [file, setFile] = useState(null); const [modal, setModal] = useState(false);
   const [input, setInput] = useState("");
   const [inputSend, setInputSend] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [loading, setloading] = useState(false);
   const messagesEndRef = useRef(null);
   const handleShare = () => {
     setModal(true);
@@ -71,16 +73,48 @@ const ChannelChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const uploadFile = async (file) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/files/upload`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      setUploading(false);
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      setUploading(false);
+      return null;
+    }
+  };
+
   // ✅ Handle sending a message
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !file) return;
+    let messageContent = input.trim();
+    if (file) {
+      setloading(true)
+      const fileUrl = await uploadFile(file);
 
+      if (!fileUrl) return;
+      messageContent = fileUrl.fileUrl;
+      setFile(null);
+      setloading(false)
+    }
     const newMessage = {
       sender: senderId, // Replace with actual user ID
       channelId: groupUsers.id,
-      message: input,
+      message: messageContent,
       createdAt: new Date(),
     };
+
 
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
@@ -97,7 +131,7 @@ const ChannelChat = () => {
       `${import.meta.env.VITE_BACKEND_API}/api/invite`,
       {
         method: "POST",
-        headers:{
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -130,6 +164,11 @@ const ChannelChat = () => {
       document.getElementById("chatInput").focus();
     }, 0);
   };
+
+  const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+  const isDocument = (url) => /\.(pdf|docx|xlsx|pptx)$/i.test(url);
+
+
 
   return (
     <div className="p-4 w-full flex flex-col h-[500px]">
@@ -204,41 +243,81 @@ const ChannelChat = () => {
 
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
-        {messages.map((msg) => (
-          <div key={msg.id}>
+        {messages.map((msg, index) => {
+
+          //(`${msg.message}?fl_attachment`)
+          return (
             <div
-              className={`pt-2 pb-2 px-2 max-w-xs rounded-lg mb-2 flex flex-col 
-            ${msg.sender === senderId
+              key={index}
+              className={`p-2 max-w-xs rounded-lg mb-2 flex justify-between 
+                      ${msg.sender === senderId
                   ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
                   : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
                 }`}
               style={{
                 width: `${msg.message.length <= 5
-                    ? 120
-                    : Math.min((msg.message?.length ?? 0) * 15, 300)
+                  ? 90
+                  : Math.min((msg.message?.length ?? 0) * 15, 300)
                   }px`,
               }}
             >
-              <div className="flex gap-2 mb-2 justify-between">
-                <p className="text-[10px]">{getSenderName(msg.sender)}</p>
-                <BsThreeDotsVertical size={15}/>
-              </div>
-
-              <div className="flex gap-2">
-                <span>{msg.message}</span>
-              </div>
-
-              <span className="text-[9px] flex justify-end">
+              {isImage(msg.message) ? (
+                <>
+                  <img
+                    src={msg.message}
+                    alt="Sent Image"
+                    className="w-45 h-auto rounded-lg"
+                  />
+                  <button
+                    onClick={() => downloadImage(msg.message)}
+                    className="px-2 py-1 bg-blue-000 text-white text-xs rounded-full text-center mt-1 self-start shadow-md"
+                  >
+                    📥 Download
+                  </button>
+                </>
+              ) : isDocument(msg.message) ? (
+                <div className="flex items-center gap-2 bg-gray-200 text-black p-2 rounded-lg">
+                  <span className="truncate w-20">
+                    {msg.message.split("/").pop()}
+                  </span>
+                  <a
+                    href={msg.message}
+                    download
+                    className="px-2 py-1 bg-blue-500 text-white text-xs rounded-full text-center mt-1 self-start shadow-md"
+                  >
+                    📥 Download
+                  </a>
+                </div>
+              ) : msg.message.startsWith("http") ? (
+                <a
+                  href={msg.message}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline break-words text-blue-300 break-all"
+                >
+                  {msg.message}
+                </a>
+              ) : (
+                <span className="whitespace-pre-wrap break-words overflow-auto">
+                  {msg.message}
+                </span>
+              )}
+              <span className="text-[9px] flex flex-col justify-end">
                 {moment(msg.createdAt).format("HH:mm")}
               </span>
-           
-
             </div>
-           
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
+
+      {
+        loading && (
+          <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 mb-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        )
+      }
 
       {/* Message Input */}
       <div className="p-4 bg-white flex items-center border-t fixed bottom-0 w-[65%] space-x-2">
