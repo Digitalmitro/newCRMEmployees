@@ -14,10 +14,11 @@ function Searchbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    onNotificationReceived((notification) => {
+    const unsubscribe = onNotificationReceived((notification) => {
       setNotification((prev) => [notification, ...prev]); // Add new notification
       setUnreadCount((prev) => prev + 1); // Increase unread count
     });
+    return () => unsubscribe();
   }, []);
 
   const toggleSidebar = () => {
@@ -25,29 +26,33 @@ function Searchbar() {
     setUnreadCount(0)
   };
 
-  function handleNotification(senderId) {
-    const clickedNotification = notification.find(item => item.sender === senderId)
-    console.log(clickedNotification);
-    if (!senderId) return;
+  function handleNotification(notify) {
+    if (!notify) return;
 
-    if (clickedNotification.type === "DM") {
-      navigate("/chat", {
-        state: {
-          name: clickedNotification?.name,
-          id: senderId
-        }
-      })
+    if (notify.type === "CONCERN" || notify.type === "CONCERN_STATUS") {
+      navigate("/concern");
       return;
     }
-    navigate(`/channelchat`, {
+
+    if (notify.type === "DM") {
+      if (!notify.sender) return;
+      navigate("/chat", {
+        state: {
+          name: notify?.name,
+          id: notify?.sender,
+        },
+      });
+      return;
+    }
+
+    if (!notify.sender) return;
+    navigate("/channelchat", {
       state: {
-        name: clickedNotification?.title,
-        description: clickedNotification?.description,
-        id: senderId
-      }
-    })
-
-
+        name: notify?.title,
+        description: notify?.description,
+        id: notify?.sender,
+      },
+    });
   }
 
 
@@ -125,7 +130,7 @@ function Searchbar() {
         <div className="mt-4 space-y-3">
           {notification.length > 0 ? (
             notification.map((notify, i) => (
-              <div key={i} className="p-3 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 transition flex justify-between items-center curson-pointer" onClick={() => handleNotification(notify.sender)}>
+              <div key={i} className="p-3 border border-gray-300 rounded-lg shadow-sm hover:bg-gray-100 transition flex justify-between items-center curson-pointer" onClick={() => handleNotification(notify)}>
                 <img src={logo} alt="" className="w-[40px]" />
                 <div >
 

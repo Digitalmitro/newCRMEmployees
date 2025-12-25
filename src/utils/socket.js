@@ -115,20 +115,25 @@ export const sendNotification = (userId, title, description) => {
 
 // Listen for incoming messages
 export const onMessageReceived = (callback) => {
-  socket.on("new-message", (message) => {
-    callback(message);
-  });
+  socket.on("new-message", callback);
+  return () => {
+    socket.off("new-message", callback);
+  };
 };
 
 
-export const onNotificationReceived = (callback) => {
-  socket.on("receive-notification", (notification) => {
+export const onNotificationReceived = (callback, options = {}) => {
+  const { showBrowserNotification = false } = options;
+  const handler = (notification) => {
     callback(notification);
-    // console.log(notification);
-
-    // ✅ Show browser notification for alerts
-    showNotification(notification.title, notification.description);
-  });
+    if (showBrowserNotification) {
+      showNotification(notification.title, notification.description);
+    }
+  };
+  socket.on("receive-notification", handler);
+  return () => {
+    socket.off("receive-notification", handler);
+  };
 };
 
 // ✅ Listen for incoming messages in a channel
@@ -153,3 +158,4 @@ export const disconnectSocket = () => {
 };
 
 export default socket;
+
