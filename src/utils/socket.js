@@ -138,9 +138,10 @@ export const onNotificationReceived = (callback, options = {}) => {
 
 // ✅ Listen for incoming messages in a channel
 export const onChannelMessageReceived = (callback) => {
-  socket.on("new-channel-message", (message) => {
-    callback(message);
-  });
+  socket.on("new-channel-message", callback);
+  return () => {
+    socket.off("new-channel-message", callback);
+  };
 };
 
 export const onSoftRefresh = (callback) => {
