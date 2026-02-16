@@ -46,6 +46,7 @@ const ChannelChat = () => {
   const messagesEndRef = useRef(null);
   const messageRefs = useRef({});
   const highlightTimerRef = useRef(null);
+  const forceBottomUntilRef = useRef(0);
   const fileInputRef = useRef(null);
 
   const handleShare = () => {
@@ -211,7 +212,29 @@ const ChannelChat = () => {
     });
   }, []);
 
+  const isNearBottom = useCallback(() => {
+    const listContainer = messageListRef.current;
+    if (!listContainer) return true;
+    const distanceFromBottom =
+      listContainer.scrollHeight -
+      (listContainer.scrollTop + listContainer.clientHeight);
+    return distanceFromBottom <= 180;
+  }, []);
+
+  const shouldForceBottom = useCallback(
+    () => Date.now() < forceBottomUntilRef.current,
+    []
+  );
+
+  const handleMessageMediaLoaded = useCallback(() => {
+    if (activeTab !== "chat") return;
+    if (shouldForceBottom() || isNearBottom()) {
+      scrollToLatestMessage("auto");
+    }
+  }, [activeTab, isNearBottom, scrollToLatestMessage, shouldForceBottom]);
+
   const queueBottomScroll = useCallback(() => {
+    forceBottomUntilRef.current = Date.now() + 1500;
     scrollToLatestMessage("auto");
     let nestedRaf = 0;
     const raf = requestAnimationFrame(() => {
@@ -220,6 +243,8 @@ const ChannelChat = () => {
     });
     const timerA = setTimeout(() => scrollToLatestMessage("auto"), 100);
     const timerB = setTimeout(() => scrollToLatestMessage("auto"), 260);
+    const timerC = setTimeout(() => scrollToLatestMessage("auto"), 520);
+    const timerD = setTimeout(() => scrollToLatestMessage("auto"), 900);
 
     return () => {
       cancelAnimationFrame(raf);
@@ -228,6 +253,8 @@ const ChannelChat = () => {
       }
       clearTimeout(timerA);
       clearTimeout(timerB);
+      clearTimeout(timerC);
+      clearTimeout(timerD);
     };
   }, [scrollToLatestMessage]);
 
@@ -634,7 +661,12 @@ const ChannelChat = () => {
 
       {activeTab === "chat" && (
       <>
-      <div ref={messageListRef} className="flex-1 px-3 lg:px-4 overflow-y-auto scrollable pb-2">
+      <div
+        ref={messageListRef}
+        className="flex-1 px-3 lg:px-4 overflow-y-auto scrollable pb-2"
+        onLoadCapture={handleMessageMediaLoaded}
+        onLoadedMetadataCapture={handleMessageMediaLoaded}
+      >
         {messages.map((msg, index) => {
           const isSelf = String(msg.sender) === String(senderId);
           const taskNumber = msg?.isSystem ? extractTaskNumber(msg?.message) : "";
