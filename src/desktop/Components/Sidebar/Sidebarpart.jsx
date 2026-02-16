@@ -235,14 +235,14 @@ function Sidebarpart() {
                   </p>
                 </li>
               ))}
-              <li>
+              {/* <li>
                 <p
                   className="block p-2 text-gray-700 text-[13px] cursor-pointer"
                   onClick={handleChannel}
                 >
                   + Add Channels
                 </p>
-              </li>
+              </li> */}
             </ul>
           </div>
 
