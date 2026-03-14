@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 function Sales() {
   const navigate=useNavigate()
+  const [saving, setSaving] = useState(false);
   const [sales,setSales]=useState( {
     name:"",
     email:"",
@@ -14,6 +15,9 @@ function Sales() {
     address:"",
     comments:"",
   })
+
+  const fieldClassName =
+    "w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-orange-300 focus:ring-2 focus:ring-orange-100";
 
   const handleChange=(e)=>{
     let name=e.target.name;
@@ -29,7 +33,8 @@ function Sales() {
     e.preventDefault();
    
     try {
-      const response=await fetch(`${import.meta.env.VITE_BACKEND_API}/sale/`,{
+      setSaving(true);
+      await fetch(`${import.meta.env.VITE_BACKEND_API}/sale/`,{
         method:"POST",
         headers:{
           "Content-Type": "application/json",
@@ -51,172 +56,112 @@ function Sales() {
       navigate("/saleslist")
     } catch (error) {
       console.log(error)
+    } finally {
+      setSaving(false);
     }
   }
   return (
-    <div className="p-4">
-      <div className="flex justify-between px-4 border-b-2 border-gray-300 p-4">
-        <div>
-          <p className="text-[18px] font-medium">Sales</p>
+    <div className="min-h-[calc(100dvh-92px)] bg-[#f7f7f5] px-4 py-4 md:px-6 md:py-5">
+      <div className="app-soft-panel overflow-hidden rounded-[28px]">
+        <div className="border-b border-slate-200 px-5 py-5 md:px-6">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-orange-500">
+                Sales Entry
+              </p>
+              <h1 className="mt-2 text-2xl font-semibold text-slate-900">
+                Create sales record
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-500">
+                Keep sales records consistent with a cleaner form that matches the rest of the workspace.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/saleslist")}
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-orange-300 hover:text-orange-500"
+            >
+              View sales list
+            </button>
+          </div>
         </div>
-        <div className=" ">
-          <button className=" mx-2 border border-orange-500 text-[12px] py-0.5 text-orange-500 px-6 rounded cursor-pointer">
-            Edit
-          </button>
-          <button className="border  border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer">
-            Add Comment
-          </button>
-        </div>
-      </div>
 
-
-      <div className="pt-10 px-2 ">
-        <form className="w-full" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 ">
-            {/* <div className="space-x-8 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
-                Created Date
-              </label>
-              <input
-                type="text"
-                name="createDate"
-                id="createDate"
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
-            </div> */}
-            <div className="space-x-19 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+        <form className="px-5 py-5 md:px-6 md:py-6" onSubmit={handleSubmit}>
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div>
+              <label htmlFor="name" className="mb-2 block text-sm font-medium text-slate-600">
                 Name
               </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-                onChange={handleChange}
-                value={sales.name}
-              />
+              <input type="text" name="name" id="name" className={fieldClassName} onChange={handleChange} value={sales.name} />
             </div>
-            <div className="space-x-20 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-600">
                 Email
               </label>
-              <input
-                type="email"
-                name="email"
-                id="email"
-                onChange={handleChange}
-                value={sales.email}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
+              <input type="email" name="email" id="email" onChange={handleChange} value={sales.email} className={fieldClassName} />
             </div>
-            <div className="space-x-4 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
-              Phone Number
+            <div>
+              <label htmlFor="phone" className="mb-2 block text-sm font-medium text-slate-600">
+                Phone Number
               </label>
-              <input
-                type="number"
-                name="phone"
-                id="phone"
-                onChange={handleChange}
-                value={sales.phone}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
+              <input type="number" name="phone" id="phone" onChange={handleChange} value={sales.phone} className={fieldClassName} />
             </div>
-            <div className="space-x-6 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+            <div>
+              <label htmlFor="domainName" className="mb-2 block text-sm font-medium text-slate-600">
                 Domain Name
               </label>
-              <input
-                type="text"
-                name="domainName"
-                id="domainName"
-                onChange={handleChange}
-                value={sales.domainName}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
+              <input type="text" name="domainName" id="domainName" onChange={handleChange} value={sales.domainName} className={fieldClassName} />
             </div>
-            <div className="space-x-16 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+            <div>
+              <label htmlFor="address" className="mb-2 block text-sm font-medium text-slate-600">
                 Address
               </label>
-              <input
-                type="text"
-                name="address"
-                id="address"
-                onChange={handleChange}
-                value={sales.address}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
+              <input type="text" name="address" id="address" onChange={handleChange} value={sales.address} className={fieldClassName} />
             </div>
-            <div className="space-x-16 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+            <div>
+              <label htmlFor="country" className="mb-2 block text-sm font-medium text-slate-600">
                 Country
               </label>
-              <input
-                type="text"
-                name="country"
-                id="country"
-                onChange={handleChange}
-                value={sales.country}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
+              <input type="text" name="country" id="country" onChange={handleChange} value={sales.country} className={fieldClassName} />
             </div>
-            <div className="space-x-14 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+            <div>
+              <label htmlFor="calldate" className="mb-2 block text-sm font-medium text-slate-600">
                 Call Date
               </label>
-              <input
-                type="date"
-                name="calldate"
-                id="calldate"
-                onChange={handleChange}
-                value={sales.calldate}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
+              <input type="date" name="calldate" id="calldate" onChange={handleChange} value={sales.calldate} className={fieldClassName} />
             </div>
-            <div className="space-x-18 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
+            <div>
+              <label htmlFor="buget" className="mb-2 block text-sm font-medium text-slate-600">
                 Budget
               </label>
-              <input
-                type="text"
-                name="budget"
-                id="budget"
-                value={sales.buget}
-                onChange={handleChange}
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
-            </div>
-            {/* <div className="space-x-12 mb-4">
-              <label htmlFor="text" className="text-[14px] font-medium">
-                Created By
-              </label>
-              <input
-                type="text"
-                className="border border-[#A6A6A6] outline-none px-2 rounded "
-              />
-            </div> */}
-            <div className="mb-4 flex space-x-13 ">
-              <label htmlFor="comment" className="text-[14px] font-medium mb-1">
-                Comment
-              </label>
-              <textarea
-              name="comments"
-                id="comment"
-                onChange={handleChange}
-                value={sales.comments}
-                rows={3}
-                className="border border-[#A6A6A6] outline-none px-2 py-1 rounded w-[44%]"
-              />
+              <input type="text" name="buget" id="buget" value={sales.buget} onChange={handleChange} className={fieldClassName} />
             </div>
           </div>
-          <div className="flex justify-center pt-8">
-        <button type="submit" className="border  border-orange-500 text-[12px] py-0.5 text-orange-500 px-4 rounded cursor-pointer">Submit</button>
-        </div>
+
+          <div className="mt-5">
+            <label htmlFor="comment" className="mb-2 block text-sm font-medium text-slate-600">
+              Comments
+            </label>
+            <textarea
+              name="comments"
+              id="comment"
+              onChange={handleChange}
+              value={sales.comments}
+              rows={5}
+              className={`${fieldClassName} min-h-[160px] resize-none`}
+            />
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              className="rounded-full bg-orange-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={saving}
+            >
+              {saving ? "Saving..." : "Create sales record"}
+            </button>
+          </div>
         </form>
-        
-        
       </div>
     </div>
   );

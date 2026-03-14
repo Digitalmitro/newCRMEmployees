@@ -73,6 +73,7 @@ function DesktopRouting() {
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>
                     <Route path="/addCoworker" element={<CreateChannel/>}/>
                     <Route path="/channelchat" element={<ChannelChat/>}/>
+                    <Route path="/channelchat/:id" element={<ChannelChat/>}/>
                     <Route path="/callbackview" element={<CallbackView/>}/>
                     <Route path="/salesview" element={<SalesView/>}/>
                     <Route path="/transferview" element={<TransferView/>}/>
