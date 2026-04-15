@@ -1,0 +1,194 @@
+.file-preview {
+  padding: 12px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+.file-preview .file-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.file-preview .file-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.file-preview .file-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+  word-break: break-word;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-preview .btn-download {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.file-preview .btn-download:hover {
+  background: linear-gradient(135deg, #1e7e34 0%, #145a27 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.file-preview .btn-preview {
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: 1px solid #0056b3;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.file-preview .btn-preview:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 86, 179, 0.2);
+}
+
+.file-preview .preview-section {
+  margin-top: 10px;
+  animation: slideDown 0.3s ease;
+}
+
+.file-preview .preview-container {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  overflow: auto;
+  max-height: 500px;
+}
+
+.file-preview .preview-container.image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.file-preview .preview-container.image img {
+  max-width: 100%;
+  max-height: 450px;
+  border-radius: 4px;
+}
+
+.file-preview .preview-container.video {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.file-preview .preview-container.video video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.file-preview .preview-container.audio {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-preview .preview-container.pdf {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.file-preview .preview-container.pdf p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.file-preview .preview-container.pdf .file-name {
+  font-weight: 600;
+  color: #212529;
+  max-width: 100%;
+}
+
+.file-preview .preview-container.pdf .preview-note {
+  font-size: 12px;
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.file-preview .error-message {
+  padding: 10px;
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .file-preview {
+    padding: 10px;
+  }
+
+  .file-preview .file-header {
+    gap: 8px;
+  }
+
+  .file-preview .file-name {
+    font-size: 13px;
+    max-width: 200px;
+  }
+
+  .file-preview .btn-download {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .file-preview .btn-preview {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .file-preview .preview-container {
+    max-height: 350px;
+  }
+
+  .file-preview .preview-container.image img,
+  .file-preview .preview-container.video video {
+    max-height: 300px;
+  }
+}
