@@ -1,78 +1,303 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { IoPeopleSharp } from "react-icons/io5";
-import { Send, Paperclip } from "lucide-react";
+import { Send, Paperclip, CornerUpLeft, X } from "lucide-react";
 import moment from "moment";
-import { useLocation } from "react-router";
+import { useLocation, useParams } from "react-router-dom";
 import { BsEmojiSmile } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { IoMdShareAlt } from "react-icons/io";
 import { useAuth } from "../../context/authContext";
-import {
-  onChannelMessageReceived,
-  sendChannelMessage,
-  joinChannel,
-} from "../../utils/socket"; // Socket functions
+import { onChannelMessageReceived, joinChannel } from "../../utils/socket";
 import axios from "axios";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { downloadImage } from "../../utils/helper";
+import { downloadFile, downloadImage, getFileNameFromUrl } from "../../utils/helper";
+import ChannelTaskManager from "../Components/Channel/ChannelTaskManager";
+
+const TASK_NUMBER_REGEX = /\bTASK-\d{4}\b/i;
+const TASK_STATUS_OPTIONS = ["Assigned", "Acknowledged", "Completed"];
+
 const ChannelChat = () => {
   const { userData } = useAuth();
   const location = useLocation();
+  const { id: channelIdParam } = useParams();
   const groupUsers = location.state;
+  const channelId = groupUsers?.id || channelIdParam;
   const senderId = userData?.userId;
   const [messages, setMessages] = useState([]);
   const [channelInfo, setChannelsInfo] = useState();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [file, setFile] = useState(null); const [modal, setModal] = useState(false);
+  const [file, setFile] = useState(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState(null);
+  const [modal, setModal] = useState(false);
   const [input, setInput] = useState("");
   const [inputSend, setInputSend] = useState("");
   const [uploading, setUploading] = useState(false);
   const [loading, setloading] = useState(false);
+  const [replyTarget, setReplyTarget] = useState(null);
+  const [highlightedId, setHighlightedId] = useState(null);
+  const [activeTab, setActiveTab] = useState(
+    location?.state?.openTasks ? "tasks" : "chat"
+  );
+  const [createTaskModalSignal, setCreateTaskModalSignal] = useState(0);
+  const [taskByNumber, setTaskByNumber] = useState({});
+  const [taskActionLoading, setTaskActionLoading] = useState({});
+  const [taskFocusNumber, setTaskFocusNumber] = useState("");
+  const [taskFocusSignal, setTaskFocusSignal] = useState(0);
+  const token = localStorage.getItem("token");
+  const messageListRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const messageRefs = useRef({});
+  const highlightTimerRef = useRef(null);
+  const forceBottomUntilRef = useRef(0);
+  const fileInputRef = useRef(null);
+
   const handleShare = () => {
     setModal(true);
   };
-  // console.log(channelInfo);
 
-  const fetchChannelsInfo = async () => {
+  const extractTaskNumber = useCallback((text = "") => {
+    if (!text) return "";
+    const match = text.match(TASK_NUMBER_REGEX);
+    return match ? match[0].toUpperCase() : "";
+  }, []);
+
+  const fetchTaskIndex = useCallback(async () => {
+    if (!channelId || !token) return;
     try {
-      const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_API}/api/${groupUsers.id}`
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API}/channels/${channelId}/tasks`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      setChannelsInfo(res.data);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return;
+      const index = {};
+      (data?.tasks || []).forEach((task) => {
+        if (task?.taskNumber) {
+          index[task.taskNumber.toUpperCase()] = task;
+        }
+      });
+      setTaskByNumber(index);
     } catch (error) {
-      console.error("❌ Error fetching channel:", error);
+      console.error("Error fetching task index:", error);
+    }
+  }, [channelId, token]);
+
+  const markChannelAsRead = useCallback(async () => {
+    if (!channelId || !token || activeTab !== "chat") return;
+    try {
+      await fetch(`${import.meta.env.VITE_BACKEND_API}/channels/${channelId}/read`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (error) {
+      console.error("Unable to mark channel messages as read:", error);
+    }
+  }, [activeTab, channelId, token]);
+
+  const openTaskDetails = (taskNumber) => {
+    if (!taskNumber) return;
+    setTaskFocusNumber(taskNumber);
+    setTaskFocusSignal((prev) => prev + 1);
+    setActiveTab("tasks");
+  };
+
+  const handleTaskQuickStatusChange = async (taskNumber, status) => {
+    if (!taskNumber || !status) return;
+    const task = taskByNumber[taskNumber];
+    if (!task?._id) {
+      openTaskDetails(taskNumber);
+      return;
+    }
+
+    setTaskActionLoading((prev) => ({ ...prev, [taskNumber]: true }));
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_API}/channels/${channelId}/tasks/${task._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        console.error(data?.message || "Unable to update task status.");
+        return;
+      }
+      if (data?.task?.taskNumber) {
+        setTaskByNumber((prev) => ({
+          ...prev,
+          [data.task.taskNumber.toUpperCase()]: data.task,
+        }));
+      }
+    } catch (error) {
+      console.error("Unable to update task status:", error);
+    } finally {
+      setTaskActionLoading((prev) => ({ ...prev, [taskNumber]: false }));
+      fetchTaskIndex();
     }
   };
 
-  // ✅ Fetch channel messages when component mounts
+  const fetchChannelsInfo = async () => {
+    if (!channelId) return;
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_API}/api/${channelId}`
+      );
+      setChannelsInfo(res.data);
+    } catch (error) {
+      console.error("Error fetching channel:", error);
+    }
+  };
+
   useEffect(() => {
+    if (!channelId) return;
     const fetchMessages = async () => {
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_API}/channels/${groupUsers.id}`
+          `${import.meta.env.VITE_BACKEND_API}/channels/${channelId}`
         );
         setMessages(res.data.messages);
       } catch (error) {
-        console.error("❌ Error fetching channel messages:", error);
+        console.error("Error fetching channel messages:", error);
       }
     };
 
     fetchMessages();
-    joinChannel(groupUsers.id);
+    joinChannel(channelId);
     fetchChannelsInfo();
-  }, [groupUsers.id]);
+    fetchTaskIndex();
+  }, [channelId, fetchTaskIndex]);
 
-  // ✅ Listen for new messages via Socket.io
   useEffect(() => {
-    onChannelMessageReceived((newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
+    markChannelAsRead();
+  }, [activeTab, channelId, markChannelAsRead]);
+
+  useEffect(() => {
+    setReplyTarget(null);
+    setHighlightedId(null);
+    setActiveTab(location?.state?.openTasks ? "tasks" : "chat");
+    setModal(false);
+  }, [channelId, location?.state?.openTasks]);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current) {
+        clearTimeout(highlightTimerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (!channelId) return;
+    const unsubscribe = onChannelMessageReceived((msg) => {
+      if (String(msg?.channelId) !== String(channelId)) return;
+      setMessages((prevMessages) => {
+        if (msg?._id && prevMessages.some((item) => item._id === msg._id)) {
+          return prevMessages;
+        }
+        return [...prevMessages, msg];
+      });
+      if (msg?.isSystem && extractTaskNumber(msg?.message)) {
+        fetchTaskIndex();
+      }
+      if (String(msg?.sender) !== String(senderId) && activeTab === "chat") {
+        markChannelAsRead();
+      }
+    });
+
+    return unsubscribe;
+  }, [activeTab, channelId, extractTaskNumber, fetchTaskIndex, markChannelAsRead, senderId]);
+
+  const scrollToLatestMessage = useCallback((behavior = "auto") => {
+    const listContainer = messageListRef.current;
+
+    if (listContainer) {
+      if (behavior === "smooth" && typeof listContainer.scrollTo === "function") {
+        listContainer.scrollTo({ top: listContainer.scrollHeight, behavior: "smooth" });
+      } else {
+        listContainer.scrollTop = listContainer.scrollHeight;
+      }
+    }
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: behavior === "smooth" ? "smooth" : "auto",
+      block: "end",
+    });
+  }, []);
+
+  const isNearBottom = useCallback(() => {
+    const listContainer = messageListRef.current;
+    if (!listContainer) return true;
+    const distanceFromBottom =
+      listContainer.scrollHeight -
+      (listContainer.scrollTop + listContainer.clientHeight);
+    return distanceFromBottom <= 180;
+  }, []);
+
+  const shouldForceBottom = useCallback(
+    () => Date.now() < forceBottomUntilRef.current,
+    []
+  );
+
+  const handleMessageMediaLoaded = useCallback(() => {
+    if (activeTab !== "chat") return;
+    if (shouldForceBottom() || isNearBottom()) {
+      scrollToLatestMessage("auto");
+    }
+  }, [activeTab, isNearBottom, scrollToLatestMessage, shouldForceBottom]);
+
+  const queueBottomScroll = useCallback(() => {
+    forceBottomUntilRef.current = Date.now() + 1500;
+    scrollToLatestMessage("auto");
+    let nestedRaf = 0;
+    const raf = requestAnimationFrame(() => {
+      scrollToLatestMessage("auto");
+      nestedRaf = requestAnimationFrame(() => scrollToLatestMessage("auto"));
+    });
+    const timerA = setTimeout(() => scrollToLatestMessage("auto"), 100);
+    const timerB = setTimeout(() => scrollToLatestMessage("auto"), 260);
+    const timerC = setTimeout(() => scrollToLatestMessage("auto"), 520);
+    const timerD = setTimeout(() => scrollToLatestMessage("auto"), 900);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      if (nestedRaf) {
+        cancelAnimationFrame(nestedRaf);
+      }
+      clearTimeout(timerA);
+      clearTimeout(timerB);
+      clearTimeout(timerC);
+      clearTimeout(timerD);
+    };
+  }, [scrollToLatestMessage]);
+
+  useEffect(() => {
+    if (activeTab !== "chat") return;
+    return queueBottomScroll();
+  }, [activeTab, channelId, messages.length, queueBottomScroll]);
+
+  useEffect(() => {
+    if (!file) {
+      setFilePreviewUrl(null);
+      return;
+    }
+    if (!file.type?.startsWith("image/")) {
+      setFilePreviewUrl(null);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    setFilePreviewUrl(previewUrl);
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [file]);
 
   const uploadFile = async (file) => {
     setUploading(true);
@@ -95,35 +320,61 @@ const ChannelChat = () => {
       return null;
     }
   };
+  const buildFileMessageUrl = (url, fileName) => {
+    if (!url || !fileName) return url;
+    if (url.includes("filename=")) return url;
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}filename=${encodeURIComponent(fileName)}`;
+  };
 
-  // ✅ Handle sending a message
   const handleSendMessage = async () => {
+    if (loading || uploading) return;
     if (!input.trim() && !file) return;
-    let messageContent = input.trim();
+    const draftInput = input.trim();
+    setInput("");
+    let messageContent = draftInput;
+
     if (file) {
-      setloading(true)
+      setloading(true);
       const fileUrl = await uploadFile(file);
 
-      if (!fileUrl) return;
-      messageContent = fileUrl.fileUrl;
+      if (!fileUrl) {
+        setloading(false);
+        return;
+      }
+      messageContent = buildFileMessageUrl(fileUrl.fileUrl, file.name);
       setFile(null);
-      setloading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setloading(false);
     }
+
     const newMessage = {
-      sender: senderId, // Replace with actual user ID
-      channelId: groupUsers.id,
+      sender: senderId,
+      channelId: channelId,
       message: messageContent,
+      replyTo: replyTarget?.id || null,
       createdAt: new Date(),
     };
 
-
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_API}/channels/send`, newMessage);
-      sendChannelMessage(newMessage.channelId, newMessage.sender, newMessage.message);
-      setMessages([...messages, newMessage]); // Optimistic UI update
-      setInput("");
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_API}/channels/send`,
+        newMessage
+      );
+      const savedMessage = response?.data?.data;
+      if (savedMessage?._id) {
+        setMessages((prevMessages) => {
+          if (prevMessages.some((msg) => msg._id === savedMessage._id)) {
+            return prevMessages;
+          }
+          return [...prevMessages, savedMessage];
+        });
+      }
+      setReplyTarget(null);
     } catch (error) {
-      console.error("❌ Error sending message:", error);
+      console.error("Error sending message:", error);
     }
   };
 
@@ -148,7 +399,7 @@ const ChannelChat = () => {
   };
 
   const handleText = (value) => {
-    setInputSend(value)
+    setInputSend(value);
   };
 
   const getSenderName = (senderId) => {
@@ -166,200 +417,548 @@ const ChannelChat = () => {
     }, 0);
   };
 
-  const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
-  const isDocument = (url) => /\.(pdf|docx|xlsx|pptx)$/i.test(url);
+  const isImage = (url) => /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(url);
+  const isVideo = (url) => /\.(mp4|webm|ogg|mov|mkv)$/i.test(url);
+  const isAudio = (url) => /\.(mp3|wav|ogg|m4a|aac)$/i.test(url);
+  const isPdf = (url) => /\.pdf$/i.test(url);
+  const isDocument = (url) => /\.(pdf|docx|doc|xlsx|xls|pptx|ppt|csv|txt|zip|rar)$/i.test(url);
+  const isLikelyAttachment = (url) =>
+    url?.startsWith("http") &&
+    (isImage(url) || isDocument(url) || isVideo(url) || isAudio(url) || url.includes("cloudinary"));
+  const getFileExtension = (url) => {
+    const fileName = getFileNameFromUrl(url);
+    const parts = fileName.split(".");
+    if (parts.length < 2) return "";
+    return parts.pop().toLowerCase();
+  };
+  const getMessagePreview = (value) => {
+    if (!value) return "";
+    if (value.startsWith("http")) {
+      if (isImage(value)) return "Photo";
+      if (isVideo(value)) return `Video: ${getFileNameFromUrl(value)}`;
+      if (isAudio(value)) return `Audio: ${getFileNameFromUrl(value)}`;
+      if (isPdf(value)) return `PDF: ${getFileNameFromUrl(value)}`;
+      if (isDocument(value)) return `Document: ${getFileNameFromUrl(value)}`;
+      return "Link";
+    }
+    return value.length > 80 ? `${value.slice(0, 80)}...` : value;
+  };
+  const renderAttachment = (url) => {
+    const fileName = getFileNameFromUrl(url);
+    const extension = getFileExtension(url);
+    const badge = extension ? extension.toUpperCase() : "FILE";
+    const metaRow = (
+      <div className="flex items-center gap-2 bg-white/90 text-gray-800 p-2 rounded-lg">
+        <span className="text-[10px] font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded">
+          {badge}
+        </span>
+        <span className="truncate w-32 text-[11px]" title={fileName}>
+          {fileName}
+        </span>
+        <button
+          onClick={() => downloadFile(url)}
+          className="px-2 py-1 bg-slate-900 text-white text-xs rounded-full text-center shrink-0 shadow-md hover:bg-slate-800"
+        >
+          Download
+        </button>
+      </div>
+    );
 
+    if (isVideo(url)) {
+      return (
+        <div className="flex flex-col gap-2">
+          <video src={url} controls preload="metadata" className="w-[220px] max-w-full rounded-md" />
+          {metaRow}
+        </div>
+      );
+    }
+    if (isAudio(url)) {
+      return (
+        <div className="flex flex-col gap-2">
+          <audio src={url} controls preload="metadata" className="w-[220px] max-w-full" />
+          {metaRow}
+        </div>
+      );
+    }
+    if (isPdf(url)) {
+      return (
+        <div className="flex flex-col gap-2">
+          <iframe
+            src={url}
+            title={fileName}
+            className="w-[220px] h-[160px] max-w-full rounded-md border border-gray-200 bg-white"
+          />
+          {metaRow}
+        </div>
+      );
+    }
+    return metaRow;
+  };
+  const getReplyContext = (msg) => {
+    if (!msg?.replyTo && !msg?.replyPreview?.message) return null;
+    if (msg?.replyPreview?.message) {
+      const senderName =
+        msg.replyPreview.senderName ||
+        (String(msg.replyPreview.sender) === String(senderId) ? "You" : getSenderName(String(msg.replyPreview.sender)));
+      return { senderName, message: msg.replyPreview.message, id: msg.replyTo };
+    }
+    if (!msg?.replyTo) return null;
+    const original = messages.find((item) => item._id === msg.replyTo);
+    if (!original) {
+      return { senderName: "Unknown", message: "Original message not available", id: msg.replyTo };
+    }
+    const senderName =
+      original?.isSystem
+        ? original.systemLabel || "System"
+        : String(original.sender) === String(senderId)
+        ? "You"
+        : getSenderName(String(original.sender));
+    return { senderName, message: getMessagePreview(original.message), id: msg.replyTo };
+  };
+  const formatFileSize = (size) => {
+    if (!size) return "";
+    const kb = size / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    return `${(kb / 1024).toFixed(1)} MB`;
+  };
+  const isSending = loading || uploading;
 
+  const formatDateLabel = (value) => {
+    const day = moment(value);
+    if (day.isSame(moment(), "day")) return "Today";
+    if (day.isSame(moment().subtract(1, "day"), "day")) return "Yesterday";
+    return day.format("DD MMM YYYY");
+  };
+
+  const handleReplySelect = (msg) => {
+    if (!msg?._id) return;
+    const senderName =
+      msg?.isSystem
+        ? msg.systemLabel || "System"
+        : String(msg.sender) === String(senderId)
+        ? "You"
+        : getSenderName(String(msg.sender));
+    setReplyTarget({
+      id: msg._id,
+      senderName,
+      message: getMessagePreview(msg.message),
+    });
+  };
+  const scrollToMessage = (id) => {
+    if (!id) return;
+    const target = messageRefs.current[id];
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(id);
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current);
+    }
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedId((current) => (current === id ? null : current));
+    }, 1200);
+  };
+  const channelDisplayName = groupUsers?.name || channelInfo?.name || "Channel";
+
+  if (!channelId) {
+    return (
+      <div className="p-4 text-sm text-gray-500">
+        Channel not found. Please open it from the channel list.
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 w-full flex flex-col h-[500px]">
-      {/* Header */}
-      <div className="flex  justify-between mb-6 border-b pt-2 px-8 pb-2 w-full">
-        <div className="flex gap-4">
-          <div className="flex items-center gap-4">
-            <p className="rounded-full border items-center text-[12px] flex justify-center w-10 h-10 font-medium text-white bg-orange-500">
+    <div className="p-0 lg:p-4 w-full flex flex-col h-[100dvh] md:h-[calc(100vh-110px)] lg:h-[calc(100vh-80px)]">
+      <div className="mb-2 lg:mb-6 border-b pt-1.5 px-2 sm:px-3 lg:px-8 pb-1.5 w-full">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0 flex items-start gap-2 sm:gap-4">
+            <p className="rounded-full border items-center text-[9px] sm:text-[12px] flex justify-center w-8 h-8 sm:w-10 sm:h-10 font-medium text-white bg-orange-500 shrink-0">
               Group
             </p>
-          </div>
-          <div>
-            <h2 className="text-sm font-semibold">
-              {groupUsers?.name?.charAt(0).toUpperCase() +
-                groupUsers?.name?.slice(1)}
-            </h2>
-            <p className="text-[10px] text-green-500 font-semibold">Active</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <IoPeopleSharp />
-            <p className="text[10px]">({channelInfo?.members.length})</p>
-          </div>
-        </div>
-        <div className="relative flex">
-          <IoMdShareAlt onClick={handleShare} className="cursor-pointer" />
-
-          {modal && (
-            <div className="absolute top-12 right-0 mt-2 space-y-4 bg-white px-2 pb-4 rounded shadow-lg  w-64">
-              <button
-                className="absolute top-1 right-0 text-xl px-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setModal(false);
-                }}
-              >
-                &times;
-              </button>
-              <input
-                name="email"
-                type="email"
-                id="email"
-                value={inputSend}
-                onChange={(e) => handleText(e.target.value)}
-                className="w-full p-1 mt-8  border border-gray-400 rounded outline-none text-[15px]"
-              />
-              <div className="flex justify-between">
-                <p className="p-1 bg-gray-200 rounded text-[12px]">
-                  {channelInfo.inviteLink}
-                </p>
-                <button
-                  className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded cursor-pointer"
-                  onClick={() => {
-                    navigator.clipboard.writeText(channelInfo.inviteLink);
-                    alert("Copied to clipboard!");
-                  }}
-                >
-                  copy
-                </button>
-              </div>
-              <div className="flex justify-center items-center">
-                <button
-                  className="ml-2 px-2 text-[12px]  pb-0.5 pt-0.5 bg-orange-400 text-white rounded"
-                  onClick={handleSend}
-                >
-                  Send
-                </button>
+            <div className="min-w-0">
+              <h2 className="text-[13px] sm:text-sm font-semibold truncate">
+                {channelDisplayName.charAt(0).toUpperCase() +
+                  channelDisplayName.slice(1)}
+              </h2>
+              <div className="mt-0.5 flex items-center gap-2">
+                <p className="text-[9px] sm:text-[10px] text-green-500 font-semibold">Active</p>
+                <div className="flex items-center gap-1 text-[11px] sm:text-xs text-gray-700">
+                  <IoPeopleSharp className="shrink-0" />
+                  <p>({channelInfo?.members?.length ?? 0})</p>
+                </div>
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 lg:flex-nowrap lg:justify-end">
+            <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 min-w-0">
+              <button
+                type="button"
+                onClick={() => setActiveTab("chat")}
+                className={`px-2 sm:px-3 py-1 text-[11px] sm:text-sm whitespace-nowrap rounded-md ${
+                  activeTab === "chat"
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                Chat
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("tasks")}
+                className={`px-2 sm:px-3 py-1 text-[11px] sm:text-sm whitespace-nowrap rounded-md ${
+                  activeTab === "tasks"
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                Manage Tasks
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCreateTaskModalSignal((prev) => prev + 1)}
+              className="rounded-md bg-orange-500 px-2.5 py-1 text-[11px] sm:px-3 sm:py-1.5 sm:text-sm font-medium text-white hover:bg-orange-600"
+            >
+              Create Task
+            </button>
+
+            <div className="relative flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={handleShare}
+                className="p-1 text-[15px] sm:text-base text-gray-700 hover:text-gray-900"
+              >
+                <IoMdShareAlt className="cursor-pointer" />
+              </button>
+
+              {modal && (
+                <div className="absolute top-10 right-0 mt-2 space-y-4 bg-white px-2 pb-4 rounded shadow-lg w-64 max-w-[85vw] z-20">
+                  <button
+                    className="absolute top-1 right-0 text-xl px-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setModal(false);
+                    }}
+                  >
+                    &times;
+                  </button>
+                  <input
+                    name="email"
+                    type="email"
+                    id="email"
+                    value={inputSend}
+                    onChange={(e) => handleText(e.target.value)}
+                    className="w-full p-1 mt-8 border border-gray-400 rounded outline-none text-[15px]"
+                  />
+                  <div className="flex justify-between">
+                    <p className="p-1 bg-gray-200 rounded text-[12px]">
+                      {channelInfo?.inviteLink}
+                    </p>
+                    <button
+                      className="ml-2 px-2 text-[12px] pb-0.5 pt-0.5 bg-orange-400 text-white rounded cursor-pointer"
+                      onClick={() => {
+                        navigator.clipboard.writeText(channelInfo?.inviteLink || "");
+                        alert("Copied to clipboard!");
+                      }}
+                    >
+                      copy
+                    </button>
+                  </div>
+                  <div className="flex justify-center items-center">
+                    <button
+                      className="ml-2 px-2 text-[12px] pb-0.5 pt-0.5 bg-orange-400 text-white rounded"
+                      onClick={handleSend}
+                    >
+                      Send
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Chat Messages */}
-      <div className="flex-1 p-4 overflow-y-auto scrollable mb-10">
+      {activeTab === "chat" && (
+      <>
+      <div
+        ref={messageListRef}
+        className="flex-1 px-2 lg:px-4 overflow-y-auto scrollable pb-2"
+        onLoadCapture={handleMessageMediaLoaded}
+        onLoadedMetadataCapture={handleMessageMediaLoaded}
+      >
         {messages.map((msg, index) => {
-
-          //(`${msg.message}?fl_attachment`)
+          const isSelf = String(msg.sender) === String(senderId);
+          const taskNumber = msg?.isSystem ? extractTaskNumber(msg?.message) : "";
+          const linkedTask = taskNumber ? taskByNumber[taskNumber] : null;
+          const isTaskActionLoading = taskNumber ? !!taskActionLoading[taskNumber] : false;
+          const senderLabel = msg?.isSystem
+            ? msg.systemLabel || "System"
+            : isSelf
+            ? "You"
+            : getSenderName(String(msg.sender));
+          const replyContext = getReplyContext(msg);
+          const currentDay = moment(msg.createdAt).format("YYYY-MM-DD");
+          const previousDay =
+            index > 0 ? moment(messages[index - 1]?.createdAt).format("YYYY-MM-DD") : null;
+          const showDateDivider = index === 0 || currentDay !== previousDay;
           return (
-            <div
-              key={index}
-              className={`p-2 max-w-xs rounded-lg mb-2 flex justify-between 
-                      ${msg.sender === senderId
-                  ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white ml-auto"
-                  : "bg-gradient-to-l from-gray-500 to-gray-700 text-white"
-                }`}
-              style={{
-                width: `${msg.message.length <= 5
-                  ? 90
-                  : Math.min((msg.message?.length ?? 0) * 15, 300)
-                  }px`,
-              }}
-            >
-              {isImage(msg.message) ? (
-                <>
-                  <img
-                    src={msg.message}
-                    alt="Sent Image"
-                    className="w-45 h-auto rounded-lg"
-                  />
-                  <button
-                    onClick={() => downloadImage(msg.message)}
-                    className="px-2 py-1 bg-blue-000 text-white text-xs rounded-full text-center mt-1 self-start shadow-md"
-                  >
-                    📥 Download
-                  </button>
-                </>
-              ) : isDocument(msg.message) ? (
-                <div className="flex items-center gap-2 bg-gray-200 text-black p-2 rounded-lg">
-                  <span className="truncate w-20">
-                    {msg.message.split("/").pop()}
+            <div key={msg._id || index}>
+              {showDateDivider && (
+                <div className="flex justify-center my-2">
+                  <span className="px-3 py-1 rounded-full bg-gray-200 text-gray-600 text-[11px]">
+                    {formatDateLabel(msg.createdAt)}
                   </span>
+                </div>
+              )}
+              <div
+                ref={(el) => {
+                  if (msg?._id && el) {
+                    messageRefs.current[msg._id] = el;
+                  }
+                }}
+                className={`p-2 rounded-lg mb-2 flex justify-between gap-2 w-fit max-w-[75%] min-w-[140px] shadow-sm
+                        ${isSelf
+                    ? "bg-[#FFFBDC] text-slate-900 border border-[#f2dba0] ml-auto"
+                    : "bg-slate-100 text-slate-900 border border-slate-200"
+                  } ${highlightedId === msg._id ? "ring-2 ring-orange-200" : ""}`}
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-semibold opacity-80 truncate max-w-[220px]" title={senderLabel}>
+                    {senderLabel}
+                  </span>
+                  {replyContext && (
+                    <button
+                      type="button"
+                      onClick={() => scrollToMessage(replyContext.id)}
+                      className={`mb-1 px-2 py-1 rounded border-l-4 text-left ${
+                        isSelf
+                          ? "bg-[#F7EFC7] border-[#e5cf8b]"
+                          : "bg-slate-200/70 border-slate-300 text-slate-700"
+                      } ${replyContext.id ? "cursor-pointer" : "cursor-default"}`}
+                      disabled={!replyContext.id}
+                    >
+                      <p
+                        className="text-[10px] font-semibold truncate max-w-[220px]"
+                        title={replyContext.senderName}
+                      >
+                        {replyContext.senderName}
+                      </p>
+                      <p className="text-[10px] truncate" title={replyContext.message}>
+                        {replyContext.message}
+                      </p>
+                    </button>
+                  )}
+                  {isImage(msg.message) ? (
+                    <>
+                      <img
+                        src={msg.message}
+                        alt="Sent Image"
+                        className="w-45 h-auto rounded-lg"
+                      />
+                      <button
+                        onClick={() => downloadImage(msg.message)}
+                        className="px-2 py-1 bg-slate-900 text-white text-xs rounded-full text-center mt-1 self-start shadow-md hover:bg-slate-800"
+                      >
+                        Download
+                      </button>
+                    </>
+                ) : isLikelyAttachment(msg.message) ? (
+                  renderAttachment(msg.message)
+                ) : msg.message.startsWith("http") ? (
                   <a
                     href={msg.message}
-                    download
-                    className="px-2 py-1 bg-blue-500 text-white text-xs rounded-full text-center mt-1 self-start shadow-md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`underline break-words break-all ${
+                      isSelf ? "text-blue-700" : "text-blue-600"
+                    }`}
                   >
-                    📥 Download
+                    {msg.message}
                   </a>
+                  ) : (
+                    <span className="whitespace-pre-wrap break-words overflow-auto">
+                      {msg.message}
+                    </span>
+                  )}
+                  {taskNumber && (
+                    <div className="mt-1.5 rounded-md border border-slate-200/80 bg-white/70 p-1.5">
+                      <p className="mb-1.5 text-[12px] font-semibold text-slate-900 break-words leading-4">
+                        {linkedTask?.title || "Task details syncing..."}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => openTaskDetails(taskNumber)}
+                          className="rounded border border-slate-300 bg-white px-2 py-1 text-[10px] font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          View Task
+                        </button>
+                        <select
+                          value={linkedTask?.status || "Syncing..."}
+                          onChange={(event) => {
+                            const nextStatus = event.target.value;
+                            if (!linkedTask || nextStatus === linkedTask.status) return;
+                            handleTaskQuickStatusChange(taskNumber, nextStatus);
+                          }}
+                          disabled={!linkedTask || isTaskActionLoading}
+                          className="rounded border border-slate-300 bg-white px-2 py-1 text-[10px] font-medium text-slate-700 disabled:opacity-60"
+                        >
+                          {linkedTask ? (
+                            TASK_STATUS_OPTIONS.map((statusOption) => (
+                              <option key={statusOption} value={statusOption}>
+                                {statusOption}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="Syncing...">Syncing...</option>
+                          )}
+                        </select>
+                      </div>
+                      {linkedTask && (
+                        <p className="mt-1 text-[10px] text-slate-500">
+                          Due {moment(linkedTask.deadline).format("DD MMM, HH:mm")}
+                          {linkedTask?.assignedToUser?.name
+                            ? ` • ${linkedTask.assignedToUser.name}`
+                            : ""}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              ) : msg.message.startsWith("http") ? (
-                <a
-                  href={msg.message}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline break-words text-blue-300 break-all"
+                <div className="flex flex-col items-end justify-between">
+                <button
+                  type="button"
+                  onClick={() => handleReplySelect(msg)}
+                  className={"text-slate-500 hover:text-slate-700"}
                 >
-                  {msg.message}
-                </a>
-              ) : (
-                <span className="whitespace-pre-wrap break-words overflow-auto">
-                  {msg.message}
-                </span>
-              )}
-              <span className="text-[9px] flex flex-col justify-end">
-                {moment(msg.createdAt).format("HH:mm")}
-              </span>
+                  <CornerUpLeft className="w-3 h-3" />
+                </button>
+                  <span
+                    className="text-[9px] flex flex-col justify-end"
+                    title={moment(msg.createdAt).format("DD MMM YYYY, HH:mm")}
+                  >
+                    {moment(msg.createdAt).format("HH:mm")}
+                  </span>
+                </div>
+              </div>
             </div>
           );
         })}
         <div ref={messagesEndRef} />
       </div>
 
-      {
-        loading && (
-          <div className="flex items-center justify-center">
-            <div className="w-5 h-5 border-2 mb-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )
-      }
-
-      {/* Message Input */}
-      <div className="p-4 bg-white flex items-center border-t fixed bottom-0 w-[65%] space-x-2">
-        <div className="relative">
-          <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-            <BsEmojiSmile size={22} className="cursor-pointer text-gray-500" />
-          </button>
-
-          {showEmojiPicker && (
-            <div className="absolute bottom-10 left-0 z-50">
-              <EmojiPicker onEmojiClick={handleEmojiClick} />
-            </div>
-          )}
+      {loading && (
+        <div className="flex items-center justify-center">
+          <div className="w-5 h-5 border-2 mb-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          className="hidden"
-          id="fileInput"
-        />
-        <label htmlFor="fileInput" className="cursor-pointer">
-          <Paperclip size={22} className="text-gray-500" />
-        </label>
+      )}
 
-        <input
-          type="text"
-          className="flex-1 p-2 border rounded-lg outline-none text-[15px] w-full"
-          placeholder="Type a message..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-        />
-        <button
-          onClick={handleSendMessage}
-          className="ml-2 p-2 bg-orange-400 text-white rounded-lg"
-        >
-          <Send className="w-5 h-5" />
+      <div className="p-3 lg:p-4 bg-white border-t w-full sticky bottom-0 left-0 right-0 z-10">
+        {replyTarget && (
+          <div className="mb-2 flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold text-orange-700">
+                Replying to {replyTarget.senderName}
+              </p>
+              <p className="text-[11px] text-gray-600 truncate">{replyTarget.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setReplyTarget(null)}
+              className="text-gray-500 hover:text-gray-700"
+              aria-label="Cancel reply"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        {file && (
+          <div className="mb-2 flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            {filePreviewUrl ? (
+              <img src={filePreviewUrl} alt="Selected file" className="w-10 h-10 rounded object-cover" />
+            ) : (
+              <div className="w-10 h-10 rounded bg-gray-200 text-[10px] font-semibold text-gray-600 flex items-center justify-center">
+                FILE
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate">{file.name}</p>
+              <p className="text-[10px] text-gray-500">{formatFileSize(file.size)}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setFile(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = "";
+                }
+              }}
+              className="text-xs text-red-500"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+        <div className="flex items-center w-full gap-2">
+          <div className="relative">
+            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+              <BsEmojiSmile size={22} className="cursor-pointer text-gray-500" />
+            </button>
+
+            {showEmojiPicker && (
+              <div className="absolute bottom-10 left-0 z-50">
+                <EmojiPicker onEmojiClick={handleEmojiClick} />
+              </div>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={(e) => setFile(e.target.files[0] || null)}
+            className="hidden"
+            id="fileInput"
+          />
+          <label htmlFor="fileInput" className="cursor-pointer">
+            <Paperclip size={22} className="text-gray-500" />
+          </label>
+
+          <input
+            type="text"
+            className="flex-1 p-2 border rounded-lg outline-none text-[15px]"
+            placeholder="Type a message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+            disabled={isSending}
+          />
+          <button
+            onClick={handleSendMessage}
+            className={`p-2 bg-orange-400 text-white rounded-lg shrink-0 ${isSending ? "opacity-60 cursor-not-allowed" : ""}`}
+            disabled={isSending}
+          >
+            <Send className="w-5 h-5" />
         </button>
+        </div>
       </div>
+      </>
+      )}
+
+      <ChannelTaskManager
+        channelId={channelId}
+        channelName={channelDisplayName}
+        channelMembers={channelInfo?.members || []}
+        currentUserId={senderId}
+        showList={activeTab === "tasks"}
+        openCreateTaskSignal={createTaskModalSignal}
+        focusTaskNumber={taskFocusNumber}
+        focusTaskSignal={taskFocusSignal}
+      />
     </div>
   );
 };
 
 export default ChannelChat;
+

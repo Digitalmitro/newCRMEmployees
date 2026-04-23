@@ -47,9 +47,9 @@ function DesktopRouting() {
           <Route
             path="*"
             element={
-              <div className="flex">
+              <div className="flex min-w-0">
                 <Sidebarpart />
-                <div className="flex-1 border border-orange-400 min-h-screen">
+                <div className="min-w-0 flex-1 border border-orange-400 min-h-screen">
                   <Searchbar />
                   <Routes>
                     <Route path="/" element={<Home />} />
@@ -73,6 +73,7 @@ function DesktopRouting() {
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>
                     <Route path="/addCoworker" element={<CreateChannel/>}/>
                     <Route path="/channelchat" element={<ChannelChat/>}/>
+                    <Route path="/channelchat/:id" element={<ChannelChat/>}/>
                     <Route path="/callbackview" element={<CallbackView/>}/>
                     <Route path="/salesview" element={<SalesView/>}/>
                     <Route path="/transferview" element={<TransferView/>}/>

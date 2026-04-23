@@ -1,33 +1,54 @@
   import { useNavigate } from "react-router-dom";
-  import { useState, useEffect } from "react";
+  import { useState, useEffect, useRef } from "react";
   import moment from "moment";
   import { FaEye } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { onSoftRefresh } from "../../utils/socket";
   function TransferList() {
     const [data, setData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [debouncedQuery, setDebouncedQuery] = useState("");
+    const lastSearchQueryRef = useRef("");
     const limit = 5;
     const navigate = useNavigate();
   
     useEffect(() => {
       const unsubscribe = onSoftRefresh((data) => {
-      if (data.type === "Transfer_Employee") {
-       fetchData(currentPage);
+        if (data.type === "Transfer_Employee") {
+          fetchTransfers(currentPage, debouncedQuery);
+        }
+      });
+
+      return () => unsubscribe();
+    }, [currentPage, debouncedQuery]);
+
+    useEffect(() => {
+      const handle = setTimeout(() => {
+        setDebouncedQuery(searchQuery);
+      }, 300);
+      return () => clearTimeout(handle);
+    }, [searchQuery]);
+
+    useEffect(() => {
+      if (debouncedQuery !== lastSearchQueryRef.current) {
+        lastSearchQueryRef.current = debouncedQuery;
+        if (currentPage !== 1) {
+          setCurrentPage(1);
+          return;
+        }
       }
-
-    });
-
-       fetchData(currentPage);
-    return () => unsubscribe(); // Cleanup on unmount
-    
-    }, [currentPage]);
+      fetchTransfers(currentPage, debouncedQuery);
+    }, [currentPage, debouncedQuery]);
   
-    const fetchData = async (page) => {
+    const fetchTransfers = async (page, query) => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/transfer/user?page=${page}&limit=${limit}`,
+        const endpoint = query?.trim()
+          ? `/search?q=${encodeURIComponent(query.trim())}&page=${page}&limit=${limit}`
+          : `/user?page=${page}&limit=${limit}`;
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/transfer${endpoint}`,
         {
           method: "GET",
           headers: {
@@ -76,6 +97,13 @@ import { onSoftRefresh } from "../../utils/socket";
     <div className=" p-4">
     <div className="border-b border-gray-300 p-4 flex justify-between">
       <h2 className="text-[15px] font-medium pb-2">View Transfer</h2>
+      <input
+        type="text"
+        placeholder="Search..."
+        className="outline-none border-b-2 border-orange-500 rounded-lg px-4 w-[300px] py-1 text-gray-600"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
       <button className="border  border-orange-500 text-[12px] py-0.5 text-orange-500 px-2 rounded cursor-pointer" onClick={handleNavigate}>Create Transfer</button>
     </div>
     <div className="pt-6 flex gap-4 justify-start">
