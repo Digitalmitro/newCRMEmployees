@@ -9,7 +9,7 @@ import arrow from "../../../assets/desktop/arrow.svg";
 import edit from "../../../assets/desktop/edit.svg";
 import logo from "../../../assets/desktop/logo.svg";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { MdOutlineTaskAlt, MdOutlineTableChart } from "react-icons/md";
+import { MdOutlineTaskAlt } from "react-icons/md";
 import { useAuth } from "../../../context/authContext";
 import { useEffect, useState } from "react";
 import socket from "../../../utils/socket";
@@ -36,8 +36,6 @@ function Sidebarpart() {
   const [unreadMessages, setUnreadMessages] = useState({});
   const { getAllUsers, userData } = useAuth();
   const [openChatId, setOpenChatId] = useState(null);
-  const [sidebarSearch, setSidebarSearch] = useState("");
-  const [pendingTasks, setPendingTasks] = useState(0);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     try {
       return localStorage.getItem(SIDEBAR_PREF_KEY) === "1";
@@ -92,55 +90,9 @@ function Sidebarpart() {
       fetchUsers();
       channel();
     });
-
-    // Bubble a channel to the top of the list when a new message arrives —
-    // same WhatsApp behaviour. updateUnread only fires when the user has
-    // unread messages; this covers the case where the user is actively
-    // looking at the channel (so unread stays 0 but the channel should
-    // still move to top).
-    const onNewMessage = (msg) => {
-      if (!msg?.channelId) return;
-      setChannels((prev) => {
-        const idx = prev.findIndex(
-          (c) => c._id?.toString() === msg.channelId?.toString()
-        );
-        if (idx <= 0) return prev; // already at top or not found
-        const updated = [...prev];
-        const [moved] = updated.splice(idx, 1);
-        updated.unshift({ ...moved, lastMessageTime: new Date().toISOString() });
-        return updated;
-      });
-    };
-    socket.on("new-channel-message", onNewMessage);
-
-    const fetchPendingTasks = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_API}/channels/tasks/count`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setPendingTasks(data?.pendingCount || 0);
-        }
-      } catch (error) {
-        // silent
-      }
-    };
-    fetchPendingTasks();
-    const taskInterval = setInterval(fetchPendingTasks, 60_000);
-    const onFocus = () => fetchPendingTasks();
-    window.addEventListener("focus", onFocus);
-    socket.on("soft-refresh", fetchPendingTasks);
    
     return () => {
-      socket.off("updateUnread");
-      socket.off("new-channel-message", onNewMessage);
-      socket.off("soft-refresh", fetchPendingTasks);
-      clearInterval(taskInterval);
-      window.removeEventListener("focus", onFocus);
+      socket.off("updateUnread"); 
       socket.disconnect();
     };
    
@@ -204,33 +156,33 @@ function Sidebarpart() {
         {/* Navigation Links */}
         <nav className="flex flex-col gap-0.5 items-stretch">
           <Link to="/" className="flex flex-col items-center py-2 rounded-md">
-            <div className="flex items-center justify-center w-[50px] h-[50px] rounded-xl bg-white shadow-sm p-1"><img src={logo} alt="" className="h-full w-full object-contain" /></div>
+            <img src={logo} alt="" className="h-[44px] w-[44px]" />
           </Link>
-          <Link to="/" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <img src={home} alt="" className="h-[20px] w-[20px] invert" />
+          <Link to="/" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
+            <img src={home} alt="" className="h-[20px] w-[20px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Home</p>
           </Link>
-          <Link to="/attendance" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <img src={attendence} alt="" className="h-[20px] w-[20px] invert" />
+          <Link to="/attendance" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
+            <img src={attendence} alt="" className="h-[20px] w-[20px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Attendance</p>
           </Link>
-          <Link to="/callbacklist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <img src={calls} alt="" className="h-[20px] w-[20px] invert" />
+          <Link to="/callbacklist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
+            <img src={calls} alt="" className="h-[20px] w-[20px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Callback</p>
           </Link>
-          <Link to="/transferlist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <img src={bidirection} alt="" className="h-[20px] w-[20px] invert" />
+          <Link to="/transferlist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
+            <img src={bidirection} alt="" className="h-[20px] w-[20px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Transfer</p>
           </Link>
-          <Link to="/saleslist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <img src={sales} alt="" className="h-[20px] w-[20px] invert" />
+          <Link to="/saleslist" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
+            <img src={sales} alt="" className="h-[20px] w-[20px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Sales</p>
           </Link>
-          <Link to="/notes" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <img src={notes} alt="" className="h-[20px] w-[20px] invert" />
+          <Link to="/notes" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
+            <img src={notes} alt="" className="h-[20px] w-[20px] invert opacity-80" />
             <p className="text-[11px] font-semibold mt-0.5">Notes</p>
           </Link>
-          <Link to="/payslips" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
+          <Link to="/payslips" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
             <span
               className="flex h-[20px] w-[20px] items-center justify-center rounded text-[11px] font-bold bg-sidebar-hover text-sidebar-text"
               aria-hidden="true"
@@ -239,18 +191,9 @@ function Sidebarpart() {
             </span>
             <p className="text-[11px] font-semibold mt-0.5">Payslips</p>
           </Link>
-          <Link to="/my-tasks" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white relative">
+          <Link to="/my-tasks" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-sidebar-muted hover:text-white">
             <MdOutlineTaskAlt size={22} />
             <p className="text-[11px] font-semibold mt-0.5">My Tasks</p>
-            {pendingTasks > 0 && (
-              <span className="absolute top-1 right-1 slack-unread">
-                {pendingTasks > 99 ? "99+" : pendingTasks}
-              </span>
-            )}
-          </Link>
-          <Link to="/salary-sheet" className="flex flex-col items-center py-2 rounded-md hover:bg-sidebar-hover text-white">
-            <MdOutlineTableChart size={22} />
-            <p className="text-[11px] font-semibold mt-0.5">Salary</p>
           </Link>
           <div className="mt-2 flex flex-col items-center">
             <button
@@ -319,16 +262,6 @@ function Sidebarpart() {
             <img src={edit} alt="" className="w-[12px] h-[12px] invert opacity-70" />
           </button>
         </div>
-        {/* Search input */}
-        <div className="px-3 mb-1">
-          <input
-            type="text"
-            placeholder="Search channels or people..."
-            value={sidebarSearch}
-            onChange={(e) => setSidebarSearch(e.target.value)}
-            className="w-full text-[13px] px-2.5 py-1.5 rounded-md bg-sidebar-hover text-white placeholder-sidebar-muted border border-sidebar-divider focus:outline-none focus:border-sidebar-active"
-          />
-        </div>
 
         <div className="flex flex-col flex-1 min-h-0 px-1">
           {/* Channels Section */}
@@ -340,7 +273,7 @@ function Sidebarpart() {
               )}
             </div>
             <ul className="flex-1 min-h-0 overflow-y-auto slack-scroll slack-scroll-dark">
-              {channels?.filter(ch => !sidebarSearch || ch.name?.toLowerCase().includes(sidebarSearch.toLowerCase())).map((channel) => {
+              {channels?.map((channel) => {
                 const isActive = location.pathname === `/channelchat/${channel._id}`;
                 return (
                 <li key={channel._id}>
@@ -356,7 +289,7 @@ function Sidebarpart() {
                       rounded="rounded-sm"
                       fontSize="10px"
                     />
-                    <span className="truncate flex-1 min-w-0 font-medium text-white">
+                    <span className="truncate flex-1 min-w-0 slack-row-meta">
                       <span className="text-sidebar-muted mr-0.5">#</span>
                       {channel.name}
                     </span>
@@ -376,7 +309,7 @@ function Sidebarpart() {
               <span>Direct messages</span>
             </div>
             <ul className="flex-1 min-h-0 overflow-y-auto slack-scroll slack-scroll-dark">
-              {employees?.filter(user => user.lastMessageTime && (!sidebarSearch || user.name?.toLowerCase().includes(sidebarSearch.toLowerCase()))).map((user, i) => {
+              {employees?.filter(user => user.lastMessageTime).map((user, i) => {
                 const isActive = location.pathname === `/chat/${user.id}`;
                 return (
                 <li key={user.id || i}>
@@ -402,7 +335,7 @@ function Sidebarpart() {
             </ul>
             <button
               type="button"
-              className="slack-row text-sidebar-text/60 hover:text-white w-full mt-1"
+              className="slack-row text-sidebar-muted w-full mt-1"
               onClick={handleCowrokers}
             >
               <span className="w-[18px] h-[18px] rounded-sm bg-sidebar-hover flex items-center justify-center text-sidebar-muted">+</span>
@@ -415,7 +348,7 @@ function Sidebarpart() {
       </div>
 
       {profileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center">
           <div className="bg-white w-full max-w-md rounded-lg shadow-modal p-4">
             <div className="flex items-center justify-between border-b border-surface-divider pb-2">
               <h3 className="text-sm font-semibold text-ink">My Profile</h3>
