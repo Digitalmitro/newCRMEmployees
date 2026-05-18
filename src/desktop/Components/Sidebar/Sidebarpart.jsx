@@ -1,4 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
 import home from "../../../assets/desktop/home.svg";
 import attendence from "../../../assets/desktop/attendence.svg";
 import bidirection from "../../../assets/desktop/bidirection.svg";
@@ -347,8 +348,8 @@ function Sidebarpart() {
         )}
       </div>
 
-      {profileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-[200] flex items-center justify-center">
+      {profileOpen && createPortal(
+        <div className="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center">
           <div className="bg-white w-full max-w-md rounded-lg shadow-modal p-4">
             <div className="flex items-center justify-between border-b border-surface-divider pb-2">
               <h3 className="text-sm font-semibold text-ink">My Profile</h3>
@@ -384,7 +385,7 @@ function Sidebarpart() {
             </div>
           </div>
         </div>
-      )}
+      , document.body)}
     </div>
   );
 }
