@@ -54,6 +54,9 @@ function Sidebarpart() {
 
   const [profile, setProfile] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [nameEdit, setNameEdit] = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   // Pull the signed-in employee's profile so the sidebar can show their avatar.
   useEffect(() => {
@@ -241,7 +244,7 @@ function Sidebarpart() {
           <div className="mt-2 flex flex-col items-center">
             <button
               type="button"
-              onClick={() => setProfileOpen(true)}
+              onClick={() => { setNameEdit(profile?.name || ""); setNameError(""); setProfileOpen(true); }}
               title="My profile"
               className="rounded-full"
             >
@@ -276,7 +279,7 @@ function Sidebarpart() {
         <div className="flex justify-between items-center px-3 pb-3 mb-1 border-b border-sidebar-divider">
           <button
             type="button"
-            onClick={() => setProfileOpen(true)}
+            onClick={() => { setNameEdit(profile?.name || ""); setNameError(""); setProfileOpen(true); }}
             className="flex items-center gap-2 text-left min-w-0"
             title="My profile"
           >
@@ -297,7 +300,7 @@ function Sidebarpart() {
           </button>
           <button
             type="button"
-            onClick={() => setProfileOpen(true)}
+            onClick={() => { setNameEdit(profile?.name || ""); setNameError(""); setProfileOpen(true); }}
             className="text-sidebar-muted hover:text-white"
             aria-label="My profile"
             title="My profile"
@@ -342,9 +345,14 @@ function Sidebarpart() {
                       fit="contain"
                       fontSize="10px"
                     />
-                    <span className="truncate flex-1 min-w-0 font-medium text-white">
+                    <span className="truncate flex-1 min-w-0 font-medium text-white flex items-center gap-1.5">
                       <span className="text-sidebar-muted mr-0.5">#</span>
                       {channel.name}
+                      <span
+                        className="shrink-0 inline-block w-2 h-2 rounded-full"
+                        style={{ backgroundColor: channel.statusTag === 'Active' || !channel.statusTag ? '#22c55e' : '#ef4444' }}
+                        title={channel.statusTag || 'Active'}
+                      />
                     </span>
                     {channel?.unreadMessages > 0 && (
                       <span className="slack-unread">{channel.unreadMessages}</span>
@@ -422,17 +430,56 @@ function Sidebarpart() {
                 }}
               />
             </div>
-            <div className="mt-4 text-xs text-ink-muted space-y-1">
-              <p><span className="font-semibold text-ink">Name:</span> {profile?.name || userData?.name}</p>
-              <p><span className="font-semibold text-ink">Email:</span> {profile?.email || "—"}</p>
+            <div className="mt-4 space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1">Display name</label>
+                <input
+                  type="text"
+                  value={nameEdit}
+                  onChange={(e) => setNameEdit(e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-sidebar-active"
+                  placeholder="Your name"
+                />
+                {nameError && <p className="text-red-500 text-[11px] mt-1">{nameError}</p>}
+              </div>
+              <div className="text-xs text-ink-muted">
+                <p><span className="font-semibold text-ink">Email:</span> {profile?.email || "—"}</p>
+              </div>
             </div>
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setProfileOpen(false)}
                 className="slack-btn-ghost"
               >
-                Close
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={nameSaving}
+                onClick={async () => {
+                  if (!nameEdit.trim()) { setNameError("Name cannot be empty."); return; }
+                  setNameSaving(true); setNameError("");
+                  try {
+                    const token = localStorage.getItem("token");
+                    const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/profile/me`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                      body: JSON.stringify({ name: nameEdit.trim() }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data?.message || "Failed");
+                    setProfile((p) => ({ ...(p || {}), name: nameEdit.trim() }));
+                    setProfileOpen(false);
+                  } catch (err) {
+                    setNameError(err.message || "Could not save name.");
+                  } finally {
+                    setNameSaving(false);
+                  }
+                }}
+                className="px-4 py-2 rounded-lg bg-sidebar text-white text-sm font-semibold disabled:opacity-50"
+              >
+                {nameSaving ? "Saving…" : "Save"}
               </button>
             </div>
           </div>
