@@ -2,8 +2,8 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Sidebarpart from "./Components/Sidebar/Sidebarpart";
-import Attendance from "./pages/Attendance";
 import Searchbar from "./Components/search/Searchbar";
+import Attendance from "./pages/Attendance";
 import Chat from "./pages/Chat";
 import CreateChannel from "./pages/CreateChannel";
 import AddChannelPeople from "./pages/AddChannelPeople";
@@ -26,6 +26,9 @@ import ChannelChat from "./pages/ChannelChat";
 import CallbackView from "./pages/CallBackView";
 import SalesView from "./pages/SalesView";
 import TransferView from "./pages/TransferView";
+import MyPayslips from "./pages/MyPayslips";
+import MyTasks from "./pages/MyTasks";
+import SalarySheet from "./pages/SalarySheet";
 import { useSocketSetup } from "../hooks/useSocketSetup";
 import { useGlobalNotification } from "../hooks/useGlobalNotifications";
 
@@ -47,10 +50,11 @@ function DesktopRouting() {
           <Route
             path="*"
             element={
-              <div className="flex">
+              <div className="flex min-w-0">
                 <Sidebarpart />
-                <div className="flex-1 border border-orange-400 min-h-screen">
+                <div className="min-w-0 flex-1 border border-orange-400 min-h-screen">
                   <Searchbar />
+                  
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/attendance" element={<Attendance />} />
@@ -73,9 +77,13 @@ function DesktopRouting() {
                     <Route path="/addCoworker" element={<AddCoworkers/>}/>
                     <Route path="/addCoworker" element={<CreateChannel/>}/>
                     <Route path="/channelchat" element={<ChannelChat/>}/>
+                    <Route path="/channelchat/:id" element={<ChannelChat/>}/>
                     <Route path="/callbackview" element={<CallbackView/>}/>
                     <Route path="/salesview" element={<SalesView/>}/>
                     <Route path="/transferview" element={<TransferView/>}/>
+                    <Route path="/payslips" element={<MyPayslips/>}/>
+                    <Route path="/my-tasks" element={<MyTasks />}/>
+                    <Route path="/salary-sheet" element={<SalarySheet />}/>
 
                   </Routes>
                 </div>

@@ -39,7 +39,7 @@ function App() {
   return (
     <AuthProvider>
     <BrowserRouter>
-      {screenWidth >= 440 ? <DesktopRouting /> : <MobileRouting />}
+      {screenWidth >= 900 ? <DesktopRouting /> : <MobileRouting />}
     </BrowserRouter>
     </AuthProvider>
   );
