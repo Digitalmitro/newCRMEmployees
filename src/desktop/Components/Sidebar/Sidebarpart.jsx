@@ -110,6 +110,10 @@ function Sidebarpart() {
     const onFocus = () => fetchPendingTasks();
     window.addEventListener("focus", onFocus);
     socket.on("soft-refresh", fetchPendingTasks);
+    // Immediate same-tab signal from ChannelTaskManager.jsx right after a
+    // status change — don't wait on the socket round-trip for whoever just
+    // took the action.
+    window.addEventListener("task-status-changed", fetchPendingTasks);
 
     const onNewMsg = (msg) => {
       if (!msg?.channelId) return;
@@ -128,6 +132,7 @@ function Sidebarpart() {
       socket.off("updateUnread");
       socket.off("new-channel-message", onNewMsg);
       socket.off("soft-refresh", fetchPendingTasks);
+      window.removeEventListener("task-status-changed", fetchPendingTasks);
       clearInterval(taskInterval);
       window.removeEventListener("focus", onFocus);
       socket.disconnect();
